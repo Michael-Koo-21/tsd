@@ -338,14 +338,20 @@ For each unexpected finding:
 
 **Locked By:** Michael Koo
 
-**Hash of Locked Document:** SHA256:validation_pilot_2026-01-12_21-09-21 (Manual lock - no git repo)
+**Git Commit Hash:** `29338c495cc4a5cdccf711e646702dfee6b911b5`
+
+**Commit Date:** 2026-01-23
+
+**Commit Message:** "Pre-registration: Lock hypotheses before full analysis - includes pre_registration.md with expected rankings and measures"
+
+**Verification Command:** `git log --oneline 29338c4 -1`
 
 **Subsequent Changes:**
 All changes after lock must be documented here with justification:
 
 | Date | Change | Reason |
 |------|--------|--------|
-| [Date] | [What changed] | [Why it changed] |
+| 2026-01-23 | Added git commit hash | Initial repo setup with pre-registration lock |
 
 ---
 
