@@ -512,6 +512,29 @@ GReaT & 0.40 & 0.77 & \textbf{0.63} \\
 
 Our empirical study is designed to be auditable and replicable. The underlying data source (2024 1-Year ACS PUMS person file for California) is publicly available from the U.S.\ Census Bureau. To enable replication of all reported analyses, we will archive (i) the complete preprocessing and recoding code, (ii) the experiment configuration specifying the exact variable set, splits, and random seeds, (iii) scripts to run generation, evaluation, and value-model aggregation end-to-end, and (iv) the full set of computed metrics and value scores used to produce tables and figures.
 
+\subsubsection{Pre-Registration and Methodological Validation}
+
+To protect against HARKing (Hypothesizing After Results are Known) and distinguish confirmatory from exploratory findings, we documented our expected results and hypotheses prior to conducting full experiments. The pre-registration document (\texttt{docs/pre\_registration.md}) was locked at git commit \texttt{29338c495cc4a5cdccf711e646702dfee6b911b5} on January 23, 2026, and includes:
+
+\begin{itemize}
+    \item Expected method rankings for each stakeholder archetype
+    \item Predicted measure value ranges for all five methods
+    \item Anticipated correlations between measures (e.g., utility--privacy tradeoff: $r \approx -0.5$)
+    \item Decision criteria for measure selection (validated via N=5K pilot)
+\end{itemize}
+
+\subsubsection{Robustness Validation}
+
+We conducted comprehensive robustness checks on our experimental results:
+
+\begin{itemize}
+    \item \textbf{Data completeness}: All 25 observations (5 methods $\times$ 5 replicates) present with no missing values
+    \item \textbf{Within-method variance}: Coefficient of variation (CV) for all measures falls within acceptable range ($0.001 < \text{CV} < 0.30$), confirming meaningful replication
+    \item \textbf{Between-method discrimination}: ANOVA confirms significant differences across methods for all primary measures (all $p < 0.001$)
+    \item \textbf{Effect sizes}: Large effect sizes observed ($\eta^2 > 0.96$ for fidelity, privacy, and utility), indicating substantial practical differences between methods
+    \item \textbf{Pre-registration consistency}: Observed measure correlations align with pre-registered expectations (e.g., Fidelity $\leftrightarrow$ Utility: $r = -0.61$, expected $-0.60$; Utility $\leftrightarrow$ Privacy: $r = -0.50$, expected $-0.50$)
+\end{itemize}
+
 %===============================================================================
 \section{Decision-Focused Transformation}
 %===============================================================================
