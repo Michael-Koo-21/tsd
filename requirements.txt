@@ -1,0 +1,26 @@
+# Dependencies for TrustingSyntheticData project
+# Install with: pip install -r requirements.txt
+
+# Core data science
+pandas>=2.0.0
+numpy>=1.24.0
+scikit-learn>=1.3.0
+scipy>=1.11.0
+
+# Synthetic data generation
+sdv>=1.3.0  # For CTGAN
+DataSynthesizer==0.1.13  # For DP Bayesian Network (PrivBayes)
+
+# Visualization (optional)
+matplotlib>=3.7.0
+seaborn>=0.12.0
+
+# Utilities
+tqdm>=4.65.0
+
+# Note: synthpop requires R and the synthpop R package
+# Install R: brew install r (macOS) or apt-get install r-base (Linux)
+# Install synthpop: R -e "install.packages('synthpop', repos='https://cloud.r-project.org')"
+
+# Optional: GReaT (requires GPU)
+# be-great>=0.0.3

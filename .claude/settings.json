@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|Bash|Task",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'Navigator: Token monitoring active'",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

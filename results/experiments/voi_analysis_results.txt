@@ -1,0 +1,66 @@
+======================================================================
+VALUE OF INFORMATION (VOI) ANALYSIS
+Following Keisler (2004) Framework
+======================================================================
+
+STRATEGY OUTCOMES (Expected Value)
+----------------------------------------------------------------------
+Strategy                  Privacy-First  Utility-First   Balanced     Mean
+----------------------------------------------------------------------
+S1 (Random)                       0.48           0.56       0.49     0.51
+S2 (Heuristic)                    0.77           0.54       0.53     0.61
+S3 (Rough Estimates)              0.72           0.79       0.61     0.70
+S4 (Full Benchmark)               0.77           0.85       0.67     0.76
+----------------------------------------------------------------------
+Oracle (EVPI bound)               0.77           0.85       0.68     0.77
+
+VOI DECOMPOSITION
+----------------------------------------------------------------------
+Component                           Privacy-First  Utility-First   Balanced     Mean
+----------------------------------------------------------------------
+Value of Prioritization                     0.24           0.23       0.11     0.19
+Value of Information                        0.05           0.06       0.06     0.06
+Total Improvement                           0.29           0.29       0.17     0.25
+----------------------------------------------------------------------
+% from Prioritization                        84%            79%        65%      76%
+% from Information                           16%            21%        35%      24%
+
+KEY FINDINGS
+----------------------------------------------------------------------
+1. Prioritization accounts for 76% of achievable value improvement
+   (Keisler 2004 found ~71% in portfolio decision analysis)
+
+2. VOI varies by archetype:
+   - Privacy-First: VOI = 0.05
+   - Utility-First: VOI = 0.06
+   - Balanced: VOI = 0.06
+
+3. Heuristics perform well when priorities are clear:
+   - Privacy-First: S2 vs S4 gap = 0.00
+   - Utility-First: S2 vs S4 gap = 0.31
+   - Balanced: S2 vs S4 gap = 0.14
+
+======================================================================
+
+LATEX TABLES FOR PAPER
+======================================================================
+
+Strategy Table:
+Strategy & Privacy-First & Utility-First & Balanced & Mean \\
+\midrule
+S1 (Random) & 0.48 & 0.56 & 0.49 & 0.51 \\
+S2 (Heuristic) & 0.77 & 0.54 & 0.53 & 0.61 \\
+S3 (Rough Estimates) & 0.72 & 0.79 & 0.61 & 0.70 \\
+S4 (Full Benchmark) & 0.77 & 0.85 & 0.67 & 0.76 \\
+\midrule
+Oracle (EVPI bound) & 0.77 & 0.85 & 0.68 & 0.77 \\
+
+VOI Table:
+Component & Privacy-First & Utility-First & Balanced & Mean \\
+\midrule
+Value of Prioritization $V(\text{S3})-V(\text{S1})$ & 0.24 & 0.23 & 0.11 & 0.19 \\
+Value of Information $V(\text{S4})-V(\text{S3})$ & 0.05 & 0.06 & 0.06 & 0.06 \\
+Total Improvement $V(\text{S4})-V(\text{S1})$ & 0.29 & 0.29 & 0.17 & 0.25 \\
+\midrule
+\% from Prioritization & 84\% & 79\% & 65\% & \textbf{76\%} \\
+\% from Information & 16\% & 21\% & 35\% & 24\% \\

@@ -1,0 +1,3 @@
+method,generation_time_sec,fidelity_auc,privacy_mi_attack_auc,privacy_mi_attack_valid,privacy_dcr_percentile,privacy_dcr_score
+Independent Marginals,0.5,0.91,0.55,False,1.5,0.8
+CTGAN,95.2,0.62,0.56,False,0.2,0.1

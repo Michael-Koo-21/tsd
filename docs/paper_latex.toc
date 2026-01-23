@@ -1,0 +1,33 @@
+\contentsline {section}{\numberline {1}Introduction}{3}{section.1}%
+\contentsline {subsection}{\numberline {1.1}The Business Practitioner's Decision Problem}{3}{subsection.1.1}%
+\contentsline {subsection}{\numberline {1.2}A Decision Analysis Approach to Synthetic Data}{4}{subsection.1.2}%
+\contentsline {subsection}{\numberline {1.3}Contributions and Paper Organization}{4}{subsection.1.3}%
+\contentsline {section}{\numberline {2}Decision Context}{5}{section.2}%
+\contentsline {subsection}{\numberline {2.1}The Stakeholder}{5}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}The Decision}{5}{subsection.2.2}%
+\contentsline {section}{\numberline {3}Objectives Hierarchy and Value Measures}{5}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Fundamental Objectives Hierarchy}{5}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}Attributes and Measures}{6}{subsection.3.2}%
+\contentsline {section}{\numberline {4}Alternatives: Synthetic Data Generation Methods}{7}{section.4}%
+\contentsline {section}{\numberline {5}Multiattribute Value Model}{7}{section.5}%
+\contentsline {subsection}{\numberline {5.1}Model Structure}{7}{subsection.5.1}%
+\contentsline {subsection}{\numberline {5.2}Single-Dimensional Value Functions}{7}{subsection.5.2}%
+\contentsline {subsection}{\numberline {5.3}Swing Weight Derivation}{8}{subsection.5.3}%
+\contentsline {section}{\numberline {6}Empirical Application: ACS PUMS Case Study}{8}{section.6}%
+\contentsline {subsection}{\numberline {6.1}Data Description}{8}{subsection.6.1}%
+\contentsline {subsection}{\numberline {6.2}Performance Estimates}{8}{subsection.6.2}%
+\contentsline {subsection}{\numberline {6.3}Global Value Model Results}{9}{subsection.6.3}%
+\contentsline {section}{\numberline {7}Decision-Focused Transformation}{9}{section.7}%
+\contentsline {subsection}{\numberline {7.1}Discriminatory Power Analysis}{9}{subsection.7.1}%
+\contentsline {subsection}{\numberline {7.2}Key Tradeoffs}{10}{subsection.7.2}%
+\contentsline {section}{\numberline {8}Value of Information Analysis}{10}{section.8}%
+\contentsline {subsection}{\numberline {8.1}Decision Strategies}{10}{subsection.8.1}%
+\contentsline {subsection}{\numberline {8.2}Value Decomposition}{10}{subsection.8.2}%
+\contentsline {subsection}{\numberline {8.3}Practical Decision Rules}{11}{subsection.8.3}%
+\contentsline {section}{\numberline {9}Sensitivity Analysis}{11}{section.9}%
+\contentsline {subsection}{\numberline {9.1}Weight Sensitivity}{11}{subsection.9.1}%
+\contentsline {subsection}{\numberline {9.2}Performance Estimate Uncertainty}{11}{subsection.9.2}%
+\contentsline {section}{\numberline {10}Discussion}{12}{section.10}%
+\contentsline {subsection}{\numberline {10.1}Insights for Practitioners}{12}{subsection.10.1}%
+\contentsline {subsection}{\numberline {10.2}Limitations}{12}{subsection.10.2}%
+\contentsline {section}{\numberline {11}Conclusion}{12}{section.11}%
