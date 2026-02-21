@@ -314,9 +314,6 @@ def tstr_utility_per_subgroup(
 
 if __name__ == "__main__":
     # Test with preprocessed ACS data
-    import sys
-
-    sys.path.append(".")
     from tsd.generators.ctgan_generator import generate_ctgan
     from tsd.generators.independent_marginals import generate_independent_marginals
     from tsd.preprocessing.load_data import preprocess_acs_data

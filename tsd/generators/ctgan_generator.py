@@ -244,9 +244,6 @@ def generate_ctgan(
 
 if __name__ == "__main__":
     # Test with preprocessed ACS data
-    import sys
-
-    sys.path.append(".")
     from tsd.preprocessing.load_data import preprocess_acs_data
 
     print("=" * 60)

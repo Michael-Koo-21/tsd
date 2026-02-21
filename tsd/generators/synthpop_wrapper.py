@@ -160,9 +160,6 @@ def generate_synthpop(
 
 if __name__ == "__main__":
     # Test synthpop wrapper
-    import sys
-
-    sys.path.append(".")
     from tsd.preprocessing.load_data import preprocess_acs_data
 
     print("=" * 70)

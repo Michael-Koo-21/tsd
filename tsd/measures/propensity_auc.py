@@ -326,9 +326,6 @@ def propensity_auc_holdout(
 
 if __name__ == "__main__":
     # Test with preprocessed ACS data
-    import sys
-
-    sys.path.append(".")
     from tsd.generators.independent_marginals import generate_independent_marginals
     from tsd.preprocessing.load_data import preprocess_acs_data
 
