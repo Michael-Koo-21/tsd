@@ -1,0 +1,8 @@
+,fidelity_auc,fidelity_auc,privacy_dcr,privacy_dcr,utility_tstr,utility_tstr,fairness_gap,fairness_gap
+,mean,std,mean,std,mean,std,mean,std
+method,,,,,,,,
+ctgan,0.8039,0.0176,0.0787,0.0063,0.9419,0.039,0.0589,0.0271
+dpbn,0.8495,0.0078,0.1089,0.0022,0.9174,0.045,0.062,0.0304
+great,0.7287,0.0021,0.0518,0.0002,0.8875,0.0052,0.0767,0.0114
+independent_marginals,0.8801,0.0042,0.1396,0.0013,0.0371,0.0067,0.0802,0.0291
+synthpop,0.4839,0.0011,0.007,0.001,1.0003,0.0019,0.0271,0.008

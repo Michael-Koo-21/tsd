@@ -1,0 +1,21 @@
+name: "ACS PUMS California"
+data_path: "data/raw/psam_p06.csv"
+target_variable: "HIGH_INCOME"
+target_binarize:
+  source_column: "PINCP"
+  threshold: 50000
+subgroup_column: "RACETH"
+categorical_columns:
+  - "SEX"
+  - "RACETH"
+  - "SCHL_RECODED"
+  - "MAR"
+  - "POBP_RECODED"
+continuous_columns:
+  - "AGEP"
+  - "PINCP"
+weight_column: "PWGTP"
+train_fraction: 0.7
+sample_size: 50000
+random_state: 42
+preprocessing: "acs_pums"
