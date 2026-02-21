@@ -94,13 +94,14 @@ venv.bak/
 *.log
 
 # Data files (large)
-# Uncomment if you don't want to track raw data
-# data/raw/*.csv
+data/raw/*.csv
 
-# Results (regeneratable)
-# Uncomment if you don't want to track generated results
-# results/pilot/
-# results/synthetic_data/
+# Overleaf artifacts
+overleaf_upload/
+overleaf_upload.zip
+
+# Synthetic data CSVs (regeneratable, ~25MB)
+results/experiments/synthetic_data/
 
 # Model artifacts
 *.pkl
