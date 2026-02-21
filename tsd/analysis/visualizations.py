@@ -11,14 +11,18 @@ Creates:
 
 from pathlib import Path
 
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
 from tsd.constants import COLORS, METHOD_LABELS, METRIC_LABELS
 
-# Style configuration
-plt.style.use("seaborn-v0_8-whitegrid")
+
+def _setup_plt():
+    """Lazy-load matplotlib and apply style."""
+    import matplotlib.pyplot as plt
+
+    plt.style.use("seaborn-v0_8-whitegrid")
+    return plt
 
 
 def load_results(filepath: str | Path) -> pd.DataFrame:
@@ -30,6 +34,7 @@ def bar_chart_comparison(df: pd.DataFrame, output_dir: Path) -> Path:
     """
     Create grouped bar chart comparing all methods across all metrics.
     """
+    plt = _setup_plt()
     metrics = ["fidelity_auc", "privacy_dcr", "utility_tstr", "fairness_gap"]
     methods = list(COLORS.keys())
 
@@ -98,6 +103,7 @@ def tradeoff_scatter_plots(df: pd.DataFrame, output_dir: Path) -> Path:
     """
     Create scatter plots showing trade-offs between metrics.
     """
+    plt = _setup_plt()
     summary = df.groupby("method").agg(
         {
             "fidelity_auc": ["mean", "std"],
@@ -166,6 +172,7 @@ def box_plots(df: pd.DataFrame, output_dir: Path) -> Path:
     """
     Create box plots showing distribution of results across replicates.
     """
+    plt = _setup_plt()
     metrics = ["fidelity_auc", "privacy_dcr", "utility_tstr", "fairness_gap"]
     methods = list(COLORS.keys())
 
@@ -212,6 +219,7 @@ def correlation_heatmap(df: pd.DataFrame, output_dir: Path) -> Path:
     """
     Create heatmap showing correlations between metrics.
     """
+    plt = _setup_plt()
     metrics = ["fidelity_auc", "privacy_dcr", "utility_tstr", "fairness_gap"]
 
     # Use method-level means
@@ -279,6 +287,7 @@ def radar_chart(df: pd.DataFrame, output_dir: Path) -> Path:
     """
     Create radar/spider chart for multi-dimensional comparison.
     """
+    plt = _setup_plt()
     metrics = ["fidelity_auc", "privacy_dcr", "utility_tstr", "fairness_gap"]
     methods = list(COLORS.keys())
 
@@ -348,6 +357,7 @@ def pareto_frontier(df: pd.DataFrame, output_dir: Path) -> Path:
     """
     Create Pareto frontier plot for fidelity vs utility trade-off.
     """
+    plt = _setup_plt()
     summary = df.groupby("method").agg(
         {
             "fidelity_auc": "mean",

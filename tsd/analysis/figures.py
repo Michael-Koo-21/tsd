@@ -7,7 +7,6 @@ to ensure figures match Table 4 values.
 
 from pathlib import Path
 
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
@@ -87,6 +86,8 @@ def calculate_weighted_score(value_scores, method, weights):
 
 def generate_mada_profile_comparison(value_scores, output_dir):
     """Generate the MADA profile comparison figure."""
+    import matplotlib.pyplot as plt
+
     plt.style.use("seaborn-v0_8-whitegrid")
     fig, axes = plt.subplots(1, 3, figsize=(16, 5))
 
@@ -143,6 +144,8 @@ def generate_mada_profile_comparison(value_scores, output_dir):
 
 def generate_pareto_frontier(df, output_dir):
     """Generate the Pareto frontier figure (Fidelity vs Utility)."""
+    import matplotlib.pyplot as plt
+
     plt.style.use("seaborn-v0_8-whitegrid")
     summary = df.groupby("method").agg({"fidelity_auc": "mean", "utility_tstr": "mean"})
 

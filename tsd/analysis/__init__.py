@@ -28,16 +28,6 @@ from .statistical_analysis import (
     pairwise_comparisons,
     run_analysis,
 )
-from .visualizations import (
-    bar_chart_comparison,
-    box_plots,
-    correlation_heatmap,
-    generate_all_visualizations,
-    pareto_frontier,
-    radar_chart,
-    tradeoff_scatter_plots,
-)
-
 __all__ = [
     # Statistical analysis
     "load_results",
@@ -47,14 +37,6 @@ __all__ = [
     "correlation_analysis",
     "generate_report",
     "run_analysis",
-    # Visualizations
-    "bar_chart_comparison",
-    "tradeoff_scatter_plots",
-    "box_plots",
-    "correlation_heatmap",
-    "radar_chart",
-    "pareto_frontier",
-    "generate_all_visualizations",
     # MADA Framework
     "PROFILES",
     "UserProfile",

@@ -23,7 +23,6 @@ Features:
 from pathlib import Path
 from typing import Literal
 
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
@@ -283,8 +282,9 @@ def generate_recommendation(
 
 def plot_comparison(
     df: pd.DataFrame, weights: dict[str, float], output_path: Path = None
-) -> plt.Figure:
+):
     """Create visual comparison of methods with current weights."""
+    import matplotlib.pyplot as plt
     scores = get_method_scores(df)
     normalized = normalize_scores(scores)
     weighted = calculate_weighted_scores(normalized, weights)
@@ -375,6 +375,8 @@ def demo_all_profiles(df: pd.DataFrame, output_dir: Path = None) -> dict:
 
     Returns dict with reports and creates comparison visualization.
     """
+    import matplotlib.pyplot as plt
+
     results = {}
 
     print("=" * 70)
