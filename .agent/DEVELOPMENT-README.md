@@ -13,7 +13,7 @@
 ### Project Structure
 ```
 TrustingSyntheticData/
-├── src/                    # Source code
+├── tsd/                    # Python package
 │   ├── generators/         # 5 synthetic data generators
 │   ├── measures/           # 5 evaluation measures
 │   ├── preprocessing/      # Data loading utilities
@@ -74,7 +74,7 @@ TrustingSyntheticData/
 ## Key Patterns
 
 ### Code Organization
-- Source code in `src/` directory
+- Source code in `tsd/` package
 - Tests in `tests/` directory
 - Data processing utilities and synthetic data generation methods
 
@@ -108,13 +108,13 @@ Key components:
 
 **GReaT Generator Notes**:
 - Requires GPU for reasonable training time
-- Use `src/generators/great_colab_notebook_fixed.ipynb` for Colab
-- Local wrapper: `src/generators/great_generator.py`
+- Use `tsd/generators/great_colab_notebook_fixed.ipynb` for Colab
+- Local wrapper: `tsd/generators/great_generator.py`
 - Must set seeds via `torch.manual_seed()` AND TrainingArguments
 
 ### When Using the Analysis Module
 ```python
-from src.analysis import (
+from tsd.analysis import (
     # Statistical analysis
     run_analysis,              # Full statistical report
     descriptive_statistics,    # Mean, std, CI by method

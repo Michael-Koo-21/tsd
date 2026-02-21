@@ -14,7 +14,7 @@ Implement comprehensive statistical analysis of experiment results and create a 
 
 ## Deliverables
 
-### 1. Statistical Analysis Module (`src/analysis/statistical_analysis.py`)
+### 1. Statistical Analysis Module (`tsd/analysis/statistical_analysis.py`)
 
 | Feature | Description |
 |---------|-------------|
@@ -28,7 +28,7 @@ Implement comprehensive statistical analysis of experiment results and create a 
 | Correlation Analysis | Spearman correlations for trade-off detection |
 | Data Quality Checks | Detect constant values, missing data |
 
-### 2. Visualization Module (`src/analysis/visualizations.py`)
+### 2. Visualization Module (`tsd/analysis/visualizations.py`)
 
 | Visualization | Purpose |
 |--------------|---------|
@@ -39,7 +39,7 @@ Implement comprehensive statistical analysis of experiment results and create a 
 | Radar Chart | Multi-dimensional method profiles |
 | Pareto Frontier | Identify Pareto-optimal methods |
 
-### 3. MADA Framework (`src/analysis/mada_framework.py`)
+### 3. MADA Framework (`tsd/analysis/mada_framework.py`)
 
 | Feature | Description |
 |---------|-------------|
@@ -83,7 +83,7 @@ Implement comprehensive statistical analysis of experiment results and create a 
 ## Files Created
 
 ```
-src/analysis/
+tsd/analysis/
 ├── __init__.py                 # Module exports (updated)
 ├── statistical_analysis.py     # NEW: Statistical tests
 ├── visualizations.py           # NEW: Plotting functions
@@ -116,22 +116,22 @@ results/experiments/
 
 ### Quick Statistical Report
 ```bash
-python -m src.analysis.statistical_analysis results/experiments/all_results_complete.csv
+python -m tsd.analysis.statistical_analysis results/experiments/all_results_complete.csv
 ```
 
 ### Generate All Visualizations
 ```bash
-python -m src.analysis.visualizations results/experiments/all_results_complete.csv
+python -m tsd.analysis.visualizations results/experiments/all_results_complete.csv
 ```
 
 ### Run MADA Demo
 ```bash
-python -m src.analysis.mada_framework results/experiments/all_results_complete.csv
+python -m tsd.analysis.mada_framework results/experiments/all_results_complete.csv
 ```
 
 ### Python API
 ```python
-from src.analysis import (
+from tsd.analysis import (
     run_analysis,
     generate_all_visualizations,
     generate_recommendation,

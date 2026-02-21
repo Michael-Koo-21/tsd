@@ -25,7 +25,7 @@ Complete the research paper with full analysis, pre-registration validation, VOI
 
 ### 2. Value of Information (VOI) Analysis
 
-**File**: `src/analysis/voi_analysis.py`
+**File**: `tsd/analysis/voi_analysis.py`
 **Results**: `results/experiments/voi_analysis_results.txt`
 
 Following Keisler (2004) framework:
@@ -104,7 +104,7 @@ Sections completed:
 | `docs/pre_registration.md` | NEW - Locked hypotheses |
 | `docs/paper_latex_complete.tex` | NEW - Full paper source |
 | `docs/paper_latex_complete.pdf` | NEW - Compiled paper |
-| `src/analysis/voi_analysis.py` | NEW - VOI analysis module |
+| `tsd/analysis/voi_analysis.py` | NEW - VOI analysis module |
 | `results/experiments/voi_analysis_results.txt` | NEW - VOI results |
 | `results/experiments/reproducibility_check.json` | NEW - Validation |
 | `results/experiments/method_summary.csv` | NEW - Rankings summary |

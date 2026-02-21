@@ -20,7 +20,7 @@ This project implements a Multiattribute Decision Analysis (MADA) framework for 
 ## Module Architecture
 
 ```
-src/
+tsd/
 ├── generators/           # Synthetic data generation
 │   ├── ctgan_generator.py
 │   ├── dpbn_generator.py (PrivBayes)

@@ -47,7 +47,7 @@ The GReaT library requires:
 
 ### 1. Created Local Generator Wrapper
 
-**File**: `src/generators/great_generator.py`
+**File**: `tsd/generators/great_generator.py`
 
 ```python
 def set_all_seeds(seed: int):
@@ -66,7 +66,7 @@ df_synth = gen.generate(n_samples=1000)
 
 ### 2. Fixed Colab Notebook
 
-**File**: `src/generators/great_colab_notebook_fixed.ipynb`
+**File**: `tsd/generators/great_colab_notebook_fixed.ipynb`
 
 Changes:
 - Added `set_all_seeds(seed)` before each training run
@@ -77,7 +77,7 @@ Changes:
 
 ### 3. Updated Generators Module
 
-**File**: `src/generators/__init__.py`
+**File**: `tsd/generators/__init__.py`
 
 Added exports:
 - `GReaTGenerator`
@@ -118,9 +118,9 @@ MD5 (great_rep5.csv) = b32517e212fec7d1d4603f4bc0f747d3
 
 | File | Action |
 |------|--------|
-| `src/generators/great_generator.py` | NEW - Local wrapper with seeding |
-| `src/generators/great_colab_notebook_fixed.ipynb` | NEW - Fixed notebook |
-| `src/generators/__init__.py` | UPDATED - Added GReaT exports |
+| `tsd/generators/great_generator.py` | NEW - Local wrapper with seeding |
+| `tsd/generators/great_colab_notebook_fixed.ipynb` | NEW - Fixed notebook |
+| `tsd/generators/__init__.py` | UPDATED - Added GReaT exports |
 | `results/experiments/synthetic_data/great_rep*.csv` | REPLACED - New data |
 | `results/experiments/all_results_complete.csv` | UPDATED - New GReaT measures |
 | `results/experiments/statistical_analysis_report.txt` | UPDATED |

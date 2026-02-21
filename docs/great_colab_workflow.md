@@ -20,7 +20,7 @@ source .venv/bin/activate
 
 # Create training data with n_samples=5000 → n_train=3500
 python -c "
-from src.preprocessing.load_data import preprocess_acs_data
+from tsd.preprocessing.load_data import preprocess_acs_data
 df_train, df_test = preprocess_acs_data(sample_size=5000)
 df_train.to_csv('great_train_data_5k.csv', index=False)
 print(f'Saved {len(df_train)} training records to great_train_data_5k.csv')
@@ -124,8 +124,8 @@ import pandas as pd
 import sys
 sys.path.insert(0, '.')
 
-from src.preprocessing.load_data import preprocess_acs_data
-from src.measures import propensity_auc, dcr_privacy, tstr_utility, fairness_gap
+from tsd.preprocessing.load_data import preprocess_acs_data
+from tsd.measures import propensity_auc, dcr_privacy, tstr_utility, fairness_gap
 
 # Load data
 df_train, df_test = preprocess_acs_data(sample_size=5000)

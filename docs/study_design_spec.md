@@ -904,7 +904,7 @@ synthetic-data-da/
 │   ├── raw/                      # Original ACS PUMS download
 │   ├── processed/                # Preprocessed splits
 │   └── synthetic/                # Generated synthetic datasets
-├── src/
+├── tsd/
 │   ├── preprocessing.py          # Data loading and preprocessing
 │   ├── generators/               # Method wrappers
 │   │   ├── baseline.py           # Independent marginals

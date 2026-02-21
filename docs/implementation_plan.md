@@ -354,7 +354,7 @@ TrustingSyntheticData/
 │       ├── ctgan/
 │       ├── privbayes/
 │       └── great/
-├── src/
+├── tsd/
 │   ├── __init__.py
 │   ├── config.py                   # Configuration loader
 │   ├── preprocessing/
@@ -416,7 +416,7 @@ TrustingSyntheticData/
 #### Generator Base Class
 
 ```python
-# src/generators/base.py
+# tsd/generators/base.py
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Optional
@@ -480,7 +480,7 @@ class SyntheticGenerator(ABC):
 #### Measure Interface
 
 ```python
-# src/measures/base.py
+# tsd/measures/base.py
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 import pandas as pd
@@ -620,7 +620,7 @@ weights:
 ### 3.4 Shared Utilities
 
 ```python
-# src/utils.py
+# tsd/utils.py
 
 import logging
 import random
@@ -682,9 +682,9 @@ def load_config(config_path: str) -> dict:
 
 | Task | Time | Deliverable |
 |------|------|-------------|
-| Implement data loading | 2 hrs | `src/preprocessing/load_data.py` |
-| Implement variable recoding | 3 hrs | `src/preprocessing/recode_variables.py` |
-| Implement train/val/test split | 1 hr | `src/preprocessing/split_data.py` |
+| Implement data loading | 2 hrs | `tsd/preprocessing/load_data.py` |
+| Implement variable recoding | 3 hrs | `tsd/preprocessing/recode_variables.py` |
+| Implement train/val/test split | 1 hr | `tsd/preprocessing/split_data.py` |
 | Create preprocessing script | 1 hr | `scripts/01_preprocess.py` |
 | Run preprocessing | 30 min | `data/processed/{train,val,test}.parquet` |
 | Validate outputs | 1 hr | EDA notebook confirming distributions |
@@ -711,12 +711,12 @@ def load_config(config_path: str) -> dict:
 
 | Task | Time | Deliverable |
 |------|------|------------|
-| Implement Propensity AUC | 2 hrs | `src/measures/fidelity.py` |
+| Implement Propensity AUC | 2 hrs | `tsd/measures/fidelity.py` |
 | Implement KS/TVD (secondary) | 2 hrs | Same file |
-| Implement DCR 5th percentile | 3 hrs | `src/measures/privacy.py` |
-| Implement TSTR F1 ratio | 2 hrs | `src/measures/utility.py` |
-| Implement subgroup gap | 2 hrs | `src/measures/fairness.py` |
-| Implement timing wrapper | 1 hr | `src/measures/efficiency.py` |
+| Implement DCR 5th percentile | 3 hrs | `tsd/measures/privacy.py` |
+| Implement TSTR F1 ratio | 2 hrs | `tsd/measures/utility.py` |
+| Implement subgroup gap | 2 hrs | `tsd/measures/fairness.py` |
+| Implement timing wrapper | 1 hr | `tsd/measures/efficiency.py` |
 | Unit tests for all measures | 2 hrs | Tests pass on dummy data |
 
 **Checkpoint:** All measures compute correctly on 1K synthetic samples
@@ -741,11 +741,11 @@ def load_config(config_path: str) -> dict:
 | Task | Time | Deliverable |
 |------|------|------------|
 | Determine empirical anchors | 1 hr | Update config with x_best/x_worst values |
-| Implement value functions | 2 hrs | `src/analysis/value_functions.py` |
-| Implement MAUT aggregation | 2 hrs | `src/analysis/maut.py` |
+| Implement value functions | 2 hrs | `tsd/analysis/value_functions.py` |
+| Implement MAUT aggregation | 2 hrs | `tsd/analysis/maut.py` |
 | Compute values for all archetypes | 1 hr | `results/value_scores.csv` |
 | Generate stacked bar charts | 2 hrs | Figures 3-4 |
-| Implement sensitivity analysis | 3 hrs | `src/analysis/sensitivity.py` |
+| Implement sensitivity analysis | 3 hrs | `tsd/analysis/sensitivity.py` |
 | Run sensitivity analysis | 2 hrs | Tornado diagrams |
 
 **Decision Analysis computation details (aligns with study design spec):**
@@ -780,7 +780,7 @@ def load_config(config_path: str) -> dict:
 
 | Task | Time | Deliverable |
 |------|------|------------|
-| Implement VOI framework | 4 hrs | `src/analysis/voi.py` |
+| Implement VOI framework | 4 hrs | `tsd/analysis/voi.py` |
 | Derive decision rules | 2 hrs | Documented heuristics |
 | Generate all figures | 3 hrs | `results/figures/` |
 | Generate all tables | 2 hrs | `results/tables/` |

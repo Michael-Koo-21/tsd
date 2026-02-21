@@ -26,9 +26,9 @@
 ### Step 1: Review What Was Created (5 min)
 
 New files created:
-- `src/measures/dcr_privacy.py` - Distance to Closest Record privacy measure
-- `src/measures/membership_inference.py` - Updated with validity checks
-- `src/validation_pilot.py` - N=5K validation script
+- `tsd/measures/dcr_privacy.py` - Distance to Closest Record privacy measure
+- `tsd/measures/membership_inference.py` - Updated with validity checks
+- `tsd/validation_pilot.py` - N=5K validation script
 - `docs/pre_registration.md` - Expected results (to prevent HARKing)
 - `docs/methodological_validation.md` - Full methodological review
 
@@ -40,7 +40,7 @@ Verify DCR implementation works:
 
 ```bash
 cd /Users/michaelkoo/Projects/TrustingSyntheticData
-python src/measures/dcr_privacy.py
+python tsd/measures/dcr_privacy.py
 ```
 
 **Expected:** Should compute DCR for Independent Marginals and CTGAN on N=2K sample.
@@ -51,7 +51,7 @@ Run the validation pilot:
 
 ```bash
 cd /Users/michaelkoo/Projects/TrustingSyntheticData
-python src/validation_pilot.py
+python tsd/validation_pilot.py
 ```
 
 **What it does:**
@@ -273,7 +273,7 @@ If you encounter issues:
 ## Summary: What You Need to Do NOW
 
 **Minimum viable validation (45 min):**
-1. ✅ Run `python src/validation_pilot.py`
+1. ✅ Run `python tsd/validation_pilot.py`
 2. ✅ Review `results/validation_pilot/decision_summary.json`
 3. ✅ If GO decision: Lock pre-registration and proceed to Week 2
 

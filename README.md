@@ -41,54 +41,33 @@ pip install -e ".[dev]"
 
 ### Run Statistical Analysis
 
-```python
-from src.analysis import run_analysis
-
-report, results = run_analysis("results/experiments/all_results_complete.csv")
-print(report)
+```bash
+tsd analyze --results results/experiments/all_results.csv
 ```
 
 ### Get Method Recommendation
 
+```bash
+# Available profiles: privacy_focused, utility_focused, balanced,
+#                    fidelity_focused, fairness_focused
+tsd recommend --results results/experiments/all_results.csv --profile balanced
+```
+
+Or via Python:
+
 ```python
-from src.analysis import generate_recommendation, load_results
+from tsd.analysis import generate_recommendation, load_results, PROFILES
 
-df = load_results("results/experiments/all_results_complete.csv")
-
-# Custom weights for your use case
-weights = {
-    "privacy": 0.45,   # High priority
-    "utility": 0.30,
-    "fidelity": 0.15,
-    "fairness": 0.10,
-}
-
-recommendation = generate_recommendation(df, weights, "My Scenario")
+df = load_results("results/experiments/all_results.csv")
+profile = PROFILES["privacy_focused"]
+recommendation = generate_recommendation(df, profile.weights, profile.name)
 print(recommendation)
 ```
 
-### Use Pre-defined Profiles
+### Verify Results
 
-```python
-from src.analysis import PROFILES, generate_recommendation, load_results
-
-df = load_results("results/experiments/all_results_complete.csv")
-
-# Available profiles: privacy_focused, utility_focused, balanced,
-#                    fidelity_focused, fairness_focused
-profile = PROFILES["privacy_focused"]
-recommendation = generate_recommendation(df, profile.weights, profile.name)
-```
-
-### Generate Visualizations
-
-```python
-from src.analysis import generate_all_visualizations
-
-figures = generate_all_visualizations(
-    "results/experiments/all_results_complete.csv",
-    output_dir="results/experiments/figures"
-)
+```bash
+tsd verify --results results/experiments/all_results.csv
 ```
 
 ## Methods Evaluated
@@ -105,18 +84,20 @@ figures = generate_all_visualizations(
 
 GReaT uses language models (GPT-2) for tabular data generation:
 - Requires GPU (use Google Colab)
-- Use `src/generators/great_colab_notebook_fixed.ipynb`
-- Local wrapper: `src/generators/great_generator.py`
+- Use `notebooks/great_colab_t4.ipynb` on Google Colab with a T4 GPU
+- Local wrapper: `tsd/generators/great_generator.py`
 
 ## Project Structure
 
 ```
 TrustingSyntheticData/
-├── src/
+├── tsd/                 # Python package
 │   ├── generators/      # 5 synthetic data generators
 │   ├── measures/        # 5 evaluation measures
 │   ├── preprocessing/   # Data loading utilities
-│   └── analysis/        # Statistical analysis & MADA framework
+│   ├── analysis/        # MADA framework, VOI, figures, verification
+│   ├── cli.py           # CLI entry point
+│   └── config.py        # Dataset configuration
 ├── tests/               # Test suite
 ├── results/
 │   └── experiments/     # Results and figures
@@ -127,8 +108,8 @@ TrustingSyntheticData/
 
 Experiment results are in `results/experiments/`:
 
-- `all_results_complete.csv` - Raw data (25 runs: 5 methods × 5 replicates)
-- `statistical_analysis_report.txt` - Full statistical report
+- `all_results.csv` - Raw data (25 runs: 5 methods × 5 replicates)
+- `summary.csv` - Method summary statistics
 - `figures/` - Publication-ready visualizations
 
 ### Generated Figures

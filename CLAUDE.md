@@ -18,7 +18,15 @@ This project implements a framework for evaluating and comparing synthetic data 
 
 ```
 TrustingSyntheticData/
-├── src/                    # Source code modules
+├── tsd/                    # Python package (was src/)
+│   ├── generators/         # 5 synthetic data generators
+│   ├── measures/           # 5 evaluation measures
+│   ├── preprocessing/      # Data loading utilities
+│   ├── analysis/           # MADA framework, VOI, figures, verification
+│   ├── configs/            # Bundled dataset configs (acs_pums.yaml)
+│   ├── cli.py              # CLI entry point (`tsd` command)
+│   ├── config.py           # Dataset configuration system
+│   └── constants.py        # Shared constants (single source of truth)
 ├── tests/                  # Test suite
 ├── data/                   # Data files
 ├── results/                # Generated results
