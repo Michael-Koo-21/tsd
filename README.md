@@ -37,6 +37,35 @@ source .venv/bin/activate
 pip install -e ".[dev]"
 ```
 
+## Data Setup
+
+The analysis commands (`tsd recommend`, `tsd verify`, `tsd analyze`) work out of the box using the pre-computed results in `results/experiments/all_results.csv`. No raw data download is needed.
+
+To regenerate synthetic data from scratch, download the ACS PUMS source data:
+
+```bash
+bash scripts/download_data.sh
+```
+
+This downloads the 2024 ACS PUMS 1-Year California person file (~278MB) to `data/raw/`.
+
+### Optional Dependencies
+
+**Synthpop** requires R and the `synthpop` R package:
+
+```bash
+# Install R, then from an R console:
+install.packages("synthpop")
+```
+
+**GReaT** requires a GPU. Use the provided Colab notebook (`notebooks/great_colab_t4.ipynb`) with a T4 runtime.
+
+**Visualizations** require the viz extras:
+
+```bash
+pip install -e ".[viz]"
+```
+
 ## Quick Start
 
 ### Run Statistical Analysis
@@ -123,6 +152,21 @@ Experiment results are in `results/experiments/`:
 | `radar_comparison.png` | Multi-dimensional comparison |
 | `pareto_frontier.png` | Pareto optimal methods |
 | `mada_all_scenarios.png` | MADA framework scenarios |
+
+## Reproducing Paper Results
+
+All claims in the paper can be verified from the committed results:
+
+```bash
+# Verify statistical claims match paper tables
+tsd verify
+
+# View MADA recommendations for all stakeholder profiles
+tsd recommend --profile balanced
+
+# Regenerate all figures (requires viz extras)
+tsd analyze
+```
 
 ## Development
 
