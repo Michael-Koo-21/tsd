@@ -1,0 +1,144 @@
+<frozen runpy>:128: RuntimeWarning: 'src.analysis.statistical_analysis' found in sys.modules after import of package 'src.analysis', but prior to execution of 'src.analysis.statistical_analysis'; this may result in unpredictable behaviour
+======================================================================
+STATISTICAL ANALYSIS REPORT
+Synthetic Data Generation Method Comparison
+======================================================================
+
+1. DATA OVERVIEW
+----------------------------------------
+Total observations: 25
+Methods: ctgan, independent_marginals, dpbn, synthpop, great
+Replicates per method: 5
+
+2. DESCRIPTIVE STATISTICS
+----------------------------------------
+
+FIDELITY_AUC:
+Method                     Mean      Std               95% CI
+------------------------------------------------------------
+dpbn                     0.9395   0.0128     [0.9283, 0.9507]
+independent_marginals    0.8417   0.0094     [0.8335, 0.8500]
+ctgan                    0.8254   0.0080     [0.8184, 0.8324]
+great                    0.6853   0.0084     [0.6780, 0.6926]
+synthpop                 0.4490   0.0054     [0.4443, 0.4537]
+
+PRIVACY_DCR:
+Method                     Mean      Std               95% CI
+------------------------------------------------------------
+dpbn                     0.5598   0.0802     [0.4895, 0.6301]
+independent_marginals    0.3268   0.0076     [0.3201, 0.3335]
+ctgan                    0.2091   0.0053     [0.2045, 0.2138]
+great                    0.1279   0.0021     [0.1261, 0.1298]
+synthpop                 0.0842   0.0063     [0.0787, 0.0898]
+
+UTILITY_TSTR:
+Method                     Mean      Std               95% CI
+------------------------------------------------------------
+synthpop                 0.9914   0.0093     [0.9833, 0.9996]
+great                    0.9647   0.0108     [0.9553, 0.9742]
+ctgan                    0.8845   0.0200     [0.8670, 0.9020]
+dpbn                     0.8535   0.0134     [0.8417, 0.8652]
+independent_marginals    0.6347   0.0519     [0.5892, 0.6802]
+
+FAIRNESS_GAP:
+Method                     Mean      Std               95% CI
+------------------------------------------------------------
+independent_marginals    0.1228   0.0369     [0.0904, 0.1552]
+ctgan                    0.1064   0.0481     [0.0642, 0.1485]
+dpbn                     0.0883   0.0385     [0.0545, 0.1220]
+synthpop                 0.0861   0.0189     [0.0695, 0.1026]
+great                    0.0434   0.0111     [0.0336, 0.0532]
+
+3. OMNIBUS TESTS (Overall Method Differences)
+----------------------------------------
+
+FIDELITY_AUC:
+  ANOVA: F=2178.329, p=0.0000
+  Kruskal-Wallis: H=22.737, p=0.0001
+  Effect size (η²): 0.9977 (large)
+  → Significant differences exist between methods
+
+PRIVACY_DCR:
+  ANOVA: F=138.283, p=0.0000
+  Kruskal-Wallis: H=23.077, p=0.0001
+  Effect size (η²): 0.9651 (large)
+  → Significant differences exist between methods
+
+UTILITY_TSTR:
+  ANOVA: F=142.937, p=0.0000
+  Kruskal-Wallis: H=22.722, p=0.0001
+  Effect size (η²): 0.9662 (large)
+  → Significant differences exist between methods
+
+FAIRNESS_GAP:
+  ANOVA: F=3.918, p=0.0166
+  Kruskal-Wallis: H=11.948, p=0.0177
+  Effect size (η²): 0.4393 (large)
+  → Significant differences exist between methods
+
+4. PAIRWISE COMPARISONS (Bonferroni corrected)
+----------------------------------------
+
+FIDELITY_AUC (α_adj = 0.0050):
+  Significant differences:
+    ctgan < dpbn: d=-10.710 (large), p=0.0000
+    ctgan > synthpop: d=55.438 (large), p=0.0000
+    ctgan > great: d=17.137 (large), p=0.0000
+    independent_marginals < dpbn: d=-8.696 (large), p=0.0000
+    independent_marginals > synthpop: d=51.138 (large), p=0.0000
+    independent_marginals > great: d=17.522 (large), p=0.0000
+    dpbn > synthpop: d=49.986 (large), p=0.0000
+    dpbn > great: d=23.501 (large), p=0.0000
+    synthpop < great: d=-33.572 (large), p=0.0000
+
+PRIVACY_DCR (α_adj = 0.0050):
+  Significant differences:
+    ctgan < independent_marginals: d=-17.873 (large), p=0.0000
+    ctgan < dpbn: d=-6.169 (large), p=0.0000
+    ctgan > synthpop: d=21.392 (large), p=0.0000
+    ctgan > great: d=20.017 (large), p=0.0000
+    independent_marginals < dpbn: d=-4.089 (large), p=0.0002
+    independent_marginals > synthpop: d=34.659 (large), p=0.0000
+    independent_marginals > great: d=35.519 (large), p=0.0000
+    dpbn > synthpop: d=8.359 (large), p=0.0000
+    dpbn > great: d=7.611 (large), p=0.0000
+    synthpop < great: d=-9.294 (large), p=0.0000
+
+UTILITY_TSTR (α_adj = 0.0050):
+  Significant differences:
+    ctgan > independent_marginals: d=6.351 (large), p=0.0000
+    ctgan < synthpop: d=-6.872 (large), p=0.0000
+    ctgan < great: d=-5.000 (large), p=0.0000
+    independent_marginals < dpbn: d=-5.772 (large), p=0.0000
+    independent_marginals < synthpop: d=-9.568 (large), p=0.0000
+    independent_marginals < great: d=-8.803 (large), p=0.0000
+    dpbn < synthpop: d=-11.969 (large), p=0.0000
+    dpbn < great: d=-9.139 (large), p=0.0000
+    synthpop > great: d=2.659 (large), p=0.0030
+
+FAIRNESS_GAP (α_adj = 0.0050):
+  Significant differences:
+    independent_marginals > great: d=2.912 (large), p=0.0017
+    synthpop > great: d=2.752 (large), p=0.0024
+
+5. METRIC CORRELATIONS (Trade-off Analysis)
+----------------------------------------
+Spearman correlations between method-level means:
+  fidelity_auc_vs_privacy_dcr: ρ=1.000 (strong positive)
+  fidelity_auc_vs_utility_tstr: ρ=-0.900 (strong negative)
+  fidelity_auc_vs_fairness_gap: ρ=0.600 (moderate positive)
+  privacy_dcr_vs_utility_tstr: ρ=-0.900 (strong negative)
+  privacy_dcr_vs_fairness_gap: ρ=0.600 (moderate positive)
+  utility_tstr_vs_fairness_gap: ρ=-0.800 (strong negative)
+
+6. KEY FINDINGS SUMMARY
+----------------------------------------
+Best performing method by metric:
+  • Fidelity AUC (lower=better, closer to 0.5): synthpop
+  • Privacy DCR (higher=better): dpbn
+  • Utility TSTR (higher=better): synthpop
+  • Fairness Gap (lower=better): great
+
+======================================================================
+END OF REPORT
+======================================================================

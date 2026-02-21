@@ -33,15 +33,6 @@ import pandas as pd
 from DataSynthesizer.DataDescriber import DataDescriber
 from DataSynthesizer.DataGenerator import DataGenerator
 
-# Fix for Python 3.13 on macOS: Set multiprocessing start method to 'fork'
-# DataSynthesizer uses multiprocessing internally and needs this
-if __name__ != "__main__":
-    try:
-        multiprocessing.set_start_method("fork", force=True)
-    except RuntimeError:
-        # Already set, ignore
-        pass
-
 
 class DPBayesianNetworkGenerator:
     """
@@ -102,6 +93,12 @@ class DPBayesianNetworkGenerator:
         Returns:
             self (for method chaining)
         """
+        # Fix for Python 3.13 on macOS: DataSynthesizer uses multiprocessing internally
+        try:
+            multiprocessing.set_start_method("fork", force=True)
+        except RuntimeError:
+            pass  # Already set
+
         print("Training DP Bayesian Network generator...")
         print(f"  Epsilon (privacy budget): {self.epsilon}")
         print(f"  Max degree: {self.degree_of_bayesian_network}")

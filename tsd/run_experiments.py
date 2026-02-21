@@ -10,7 +10,6 @@ Usage:
     tsd run --n-samples 1000 --n-replicates 1 --methods independent_marginals  # Test run
 """
 
-import argparse
 import json
 import time
 import warnings
@@ -19,7 +18,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from tsd.config import DatasetConfig, default_config_path, load_config
+from tsd.config import DatasetConfig
 from tsd.generators.ctgan_generator import generate_ctgan
 from tsd.generators.dp_bayesian_network import generate_dp_bayesian_network
 from tsd.generators.great_generator import generate_great
@@ -315,56 +314,3 @@ def run_experiments(
     print(f"\n{'='*70}")
     print("EXPERIMENTS COMPLETE")
     print(f"{'='*70}")
-
-
-def main():
-    parser = argparse.ArgumentParser(description="Run synthetic data experiments")
-    parser.add_argument(
-        "--config",
-        type=str,
-        default=None,
-        help="Path to dataset config YAML (default: bundled acs_pums.yaml)",
-    )
-    parser.add_argument(
-        "--n-samples", type=int, default=35000, help="Number of samples (default: 35000)"
-    )
-    parser.add_argument(
-        "--n-replicates", type=int, default=5, help="Number of replicates (default: 5)"
-    )
-    parser.add_argument(
-        "--methods",
-        nargs="+",
-        default=["independent_marginals", "ctgan", "dpbn", "synthpop", "great"],
-        help="Methods to run (default: all 5 methods)",
-    )
-    parser.add_argument(
-        "--skip-measures",
-        action="store_true",
-        help="Only generate synthetic data, skip measures",
-    )
-    parser.add_argument("--reset", action="store_true", help="Reset checkpoint and start fresh")
-
-    args = parser.parse_args()
-
-    # Load config
-    config_path = args.config if args.config else default_config_path()
-    config = load_config(config_path)
-
-    # Reset checkpoint if requested
-    if args.reset:
-        checkpoint_file = RESULTS_DIR / "checkpoint.json"
-        if checkpoint_file.exists():
-            checkpoint_file.unlink()
-            print("Checkpoint reset.")
-
-    run_experiments(
-        config=config,
-        n_samples=args.n_samples,
-        n_replicates=args.n_replicates,
-        methods=args.methods,
-        skip_measures=args.skip_measures,
-    )
-
-
-if __name__ == "__main__":
-    main()

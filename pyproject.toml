@@ -49,12 +49,16 @@ great = [
     "be-great>=0.0.3",
 ]
 
+[project.scripts]
+tsd = "tsd.cli:main"
+
 [project.urls]
 Homepage = "https://github.com/MichaelKoo21/TrustingSyntheticData"
+Repository = "https://github.com/MichaelKoo21/TrustingSyntheticData"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["src*"]
+include = ["tsd*"]
 
 [tool.black]
 line-length = 100

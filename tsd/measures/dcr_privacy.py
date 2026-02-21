@@ -126,10 +126,10 @@ def dcr_privacy(
 
     # Compute typical distance in training data itself
     # Sample 1000 pairs to estimate typical distance
-    np.random.seed(random_state)
+    rng = np.random.default_rng(random_state)
     n_train = X_train.shape[0]
     if n_train > 1000:
-        sample_indices = np.random.choice(n_train, size=1000, replace=False)
+        sample_indices = rng.choice(n_train, size=1000, replace=False)
         X_train_sample = X_train[sample_indices]
     else:
         X_train_sample = X_train

@@ -112,8 +112,23 @@ results/experiments/synthetic_data/
 # DataSynthesizer temp files
 dp_bn_*/
 
-# Navigator context markers
-.agent/.context-markers/
+# AI development tools
+.agent/
+.claude/
+CLAUDE.md
 
-# Navigator temporary files
-.agent/.nav-temp/
+# ML checkpoints
+great_checkpoints/
+
+# LaTeX build artifacts
+*.aux
+*.out
+*.toc
+*.synctex.gz
+
+# Root-level data/training files (regeneratable)
+train_data.csv
+great_train_data_*.csv
+
+# Stale source directory
+src/

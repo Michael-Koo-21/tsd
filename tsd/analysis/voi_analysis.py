@@ -113,7 +113,7 @@ def compute_method_value(values: pd.DataFrame, weights: Dict[str, float]) -> pd.
         "synthpop": 1.0,  # <1 min
         "ctgan": 0.95,  # ~1 min
         "dpbn": 1.0,  # <1 min
-        "great": 0.0,  # ~90 min (worst)
+        "great": 0.24,  # ~90 min (worst)
     }
 
     if "efficiency" in weights:

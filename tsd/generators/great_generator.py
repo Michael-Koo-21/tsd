@@ -224,9 +224,9 @@ def generate_great(
     llm : str
         Language model to use (default: 'distilgpt2')
     epochs : int
-        Training epochs (default: 100)
+        Training epochs (default: 15)
     batch_size : int
-        Training batch size (default: 32)
+        Training batch size (default: 64)
     random_state : int, optional
         Random seed for reproducibility
     device : str

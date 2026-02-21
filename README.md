@@ -26,7 +26,7 @@ This project provides a systematic approach to comparing synthetic data generati
 
 ```bash
 # Clone repository
-git clone https://github.com/username/TrustingSyntheticData.git
+git clone https://github.com/MichaelKoo21/TrustingSyntheticData.git
 cd TrustingSyntheticData
 
 # Create virtual environment
@@ -190,7 +190,7 @@ If you use this framework in your research, please cite:
 @software{trustingsyntheticdata2026,
   title = {TrustingSyntheticData: A MADA Framework for Synthetic Data Method Selection},
   year = {2026},
-  url = {https://github.com/username/TrustingSyntheticData}
+  url = {https://github.com/MichaelKoo21/TrustingSyntheticData}
 }
 ```
 
