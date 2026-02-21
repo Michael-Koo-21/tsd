@@ -280,11 +280,10 @@ def generate_recommendation(
     return "\n".join(report)
 
 
-def plot_comparison(
-    df: pd.DataFrame, weights: dict[str, float], output_path: Path = None
-):
+def plot_comparison(df: pd.DataFrame, weights: dict[str, float], output_path: Path = None):
     """Create visual comparison of methods with current weights."""
     import matplotlib.pyplot as plt
+
     scores = get_method_scores(df)
     normalized = normalize_scores(scores)
     weighted = calculate_weighted_scores(normalized, weights)

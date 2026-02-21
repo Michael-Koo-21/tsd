@@ -28,6 +28,7 @@ from .statistical_analysis import (
     pairwise_comparisons,
     run_analysis,
 )
+
 __all__ = [
     # Statistical analysis
     "load_results",
