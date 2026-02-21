@@ -112,6 +112,15 @@ results/experiments/synthetic_data/
 # DataSynthesizer temp files
 dp_bn_*/
 
+# Paper and docs (lives in Overleaf)
+docs/
+
+# Experiment artifacts
+results/**/checkpoint.json
+results/**/*.txt
+results/pilot/
+results/validation_pilot/
+
 # AI development tools
 .agent/
 .claude/

@@ -525,10 +525,3 @@ def interactive_demo(filepath: str | Path):
     print(results["balanced"]["report"])
 
     return results
-
-
-if __name__ == "__main__":
-    import sys
-
-    filepath = sys.argv[1] if len(sys.argv) > 1 else "results/experiments/all_results_complete.csv"
-    interactive_demo(filepath)

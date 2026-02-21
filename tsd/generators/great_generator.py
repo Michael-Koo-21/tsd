@@ -45,9 +45,6 @@ def set_all_seeds(seed: int):
         torch.cuda.manual_seed_all(seed)
         torch.backends.cudnn.deterministic = True
         torch.backends.cudnn.benchmark = False
-    if torch.backends.mps.is_available():
-        # MPS doesn't have separate seeding, but torch.manual_seed covers it
-        pass
 
 
 class GReaTGenerator:
@@ -252,33 +249,3 @@ def generate_great(
     )
     gen.fit(df)
     return gen.generate(n_samples=n_samples, device=device, k=k)
-
-
-if __name__ == "__main__":
-    # Quick test
-    print("GReaT Generator Module")
-    print("=" * 40)
-
-    # Check if be_great is available
-    try:
-        from be_great import GReaT  # noqa: F401
-
-        print("✓ be_great library available")
-    except ImportError:
-        print("✗ be_great not installed")
-        print("  Install with: pip install be-great")
-
-    # Check available devices
-    print("\nDevice availability:")
-    if torch.cuda.is_available():
-        print(f"  ✓ CUDA available: {torch.cuda.get_device_name(0)}")
-    else:
-        print("  ✗ CUDA not available")
-
-    if torch.backends.mps.is_available():
-        print("  ✓ MPS available (Apple Silicon)")
-    else:
-        print("  ✗ MPS not available")
-
-    best_device = get_best_device()
-    print(f"\n  Best device: {best_device}")

@@ -240,38 +240,3 @@ def generate_ctgan(
         categorical_columns=categorical_columns,
     )
     return generator.fit_sample(df_train, n_samples)
-
-
-if __name__ == "__main__":
-    # Test with preprocessed ACS data
-    from tsd.preprocessing.load_data import preprocess_acs_data
-
-    print("=" * 60)
-    print("Testing CTGAN Generator")
-    print("=" * 60)
-
-    # Load and preprocess data (using small sample for testing)
-    df_train, df_test = preprocess_acs_data(sample_size=1000)
-
-    # Generate synthetic data
-    df_synthetic = generate_ctgan(
-        df_train=df_train,
-        n_samples=len(df_train),
-        epochs=10,  # Reduced for testing
-        batch_size=100,
-        verbose=True,
-        random_state=42,
-    )
-
-    print("\nSynthetic data preview:")
-    print(df_synthetic.head())
-
-    print("\nVariable distributions comparison:")
-    for col in df_train.columns:
-        print(f"\n{col}:")
-        print(f"  Real:      {df_train[col].describe()['mean']:.2f} mean")
-        print(f"  Synthetic: {df_synthetic[col].describe()['mean']:.2f} mean")
-
-    print("\nSchema validation:")
-    print(f"  Columns match: {set(df_train.columns) == set(df_synthetic.columns)}")
-    print(f"  Shape: Train {df_train.shape}, Synthetic {df_synthetic.shape}")

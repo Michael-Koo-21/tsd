@@ -384,14 +384,3 @@ def load_and_preprocess(config: DatasetConfig) -> tuple[pd.DataFrame, pd.DataFra
     if config.sample_size and len(df) > config.sample_size:
         df = df.sample(n=config.sample_size, random_state=config.random_state)
     return train_test_split(df, train_size=config.train_fraction, random_state=config.random_state)
-
-
-if __name__ == "__main__":
-    # Test the preprocessing pipeline
-    df_train, df_test = preprocess_acs_data()
-
-    print("\nTrain data preview:")
-    print(df_train.head())
-
-    print("\nTrain data info:")
-    print(df_train.info())

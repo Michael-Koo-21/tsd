@@ -246,11 +246,3 @@ def regenerate_paper_figures(results_path: str | Path, output_dir: str | Path):
     generate_all_visualizations(results_path, output_dir)
 
     print("\nAll figures regenerated.")
-
-
-if __name__ == "__main__":
-    import sys
-
-    path = sys.argv[1] if len(sys.argv) > 1 else "results/experiments/all_results.csv"
-    out = sys.argv[2] if len(sys.argv) > 2 else "results/experiments/figures"
-    regenerate_paper_figures(path, out)

@@ -196,8 +196,9 @@ def box_plots(df: pd.DataFrame, output_dir: Path) -> Path:
         ax.tick_params(axis="x", rotation=45)
 
         # Add individual points
+        rng = np.random.default_rng(42)
         for i, (_method, d) in enumerate(zip(methods, data)):
-            x = np.random.normal(i + 1, 0.04, size=len(d))
+            x = rng.normal(i + 1, 0.04, size=len(d))
             ax.scatter(x, d, alpha=0.6, color="black", s=20, zorder=3)
 
     plt.suptitle(
@@ -487,16 +488,3 @@ def generate_all_visualizations(filepath: str | Path, output_dir: str | Path = N
     print(f"\nAll visualizations saved to: {output_dir}")
 
     return results
-
-
-if __name__ == "__main__":
-    import sys
-
-    filepath = sys.argv[1] if len(sys.argv) > 1 else "results/experiments/all_results_complete.csv"
-    output_dir = sys.argv[2] if len(sys.argv) > 2 else None
-
-    results = generate_all_visualizations(filepath, output_dir)
-
-    print("\nGenerated files:")
-    for name, path in results.items():
-        print(f"  - {name}: {path}")

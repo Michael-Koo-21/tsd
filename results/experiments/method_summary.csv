@@ -1,6 +1,0 @@
-method,fidelity_auc_mean,fidelity_auc_std,privacy_dcr_mean,privacy_dcr_std,utility_tstr_mean,utility_tstr_std,fairness_gap_mean,fairness_gap_std,efficiency_time_mean,efficiency_time_std
-ctgan,0.8254,0.008,0.2091,0.0053,0.8845,0.02,0.1064,0.0481,1.0,0.0
-dpbn,0.9395,0.0128,0.5598,0.0802,0.8535,0.0134,0.0883,0.0385,0.5,0.0
-great,0.6853,0.0084,0.1279,0.0021,0.9647,0.0108,0.0434,0.0111,60.0,0.0
-independent_marginals,0.8417,0.0094,0.3268,0.0076,0.6347,0.0519,0.1228,0.0369,0.1,0.0
-synthpop,0.449,0.0054,0.0842,0.0063,0.9914,0.0093,0.0861,0.0189,0.5,0.0

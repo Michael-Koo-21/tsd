@@ -471,10 +471,3 @@ def main(filepath: str | Path = None):
     print(voi_table)
 
     return results
-
-
-if __name__ == "__main__":
-    import sys
-
-    filepath = sys.argv[1] if len(sys.argv) > 1 else None
-    main(filepath)

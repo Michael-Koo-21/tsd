@@ -17,7 +17,6 @@ Reference:
 
 import os
 import subprocess
-import sys
 import tempfile
 from pathlib import Path
 
@@ -157,73 +156,3 @@ def generate_synthpop(
                     os.remove(path)
                 except OSError:
                     pass  # Ignore cleanup errors
-
-
-if __name__ == "__main__":
-    # Test synthpop wrapper
-    from tsd.preprocessing.load_data import preprocess_acs_data
-
-    print("=" * 70)
-    print("Testing Synthpop Wrapper")
-    print("=" * 70)
-
-    # Check R installation
-    print("\nChecking R installation...")
-    try:
-        result = subprocess.run(
-            ["Rscript", "--version"], capture_output=True, check=True, text=True
-        )
-        print("  ✓ R is installed")
-        print(result.stderr.strip())  # R version goes to stderr
-    except (subprocess.CalledProcessError, FileNotFoundError):
-        print("  ✗ R not found!")
-        print("\nPlease install R:")
-        print("  macOS: brew install r")
-        print("  Ubuntu: sudo apt-get install r-base")
-        print("  Windows: https://www.r-project.org/")
-        sys.exit(1)
-
-    # Check synthpop package
-    print("\nChecking synthpop package...")
-    check_cmd = ["Rscript", "-e", "if (!require('synthpop', quietly=TRUE)) quit(status=1)"]
-    result = subprocess.run(check_cmd, capture_output=True)
-
-    if result.returncode != 0:
-        print("  ✗ synthpop package not installed!")
-        print("\nPlease install synthpop in R:")
-        print("  R -e \"install.packages('synthpop')\"")
-        sys.exit(1)
-    else:
-        print("  ✓ synthpop package is installed")
-
-    # Load test data
-    print("\nLoading test data (N=1K)...")
-    df_train, df_test = preprocess_acs_data(sample_size=1000, random_state=42)
-    print(f"  Train: {len(df_train):,} records")
-
-    # Generate synthetic data
-    print("\nGenerating synthetic data with Synthpop...")
-    try:
-        df_synthetic = generate_synthpop(
-            df_train=df_train, n_samples=len(df_train), random_state=42, verbose=True
-        )
-
-        print("\nValidation:")
-        print(f"  Rows: {len(df_synthetic):,} (expected {len(df_train):,})")
-        print(f"  Columns: {len(df_synthetic.columns)} (expected {len(df_train.columns)})")
-
-        if set(df_synthetic.columns) == set(df_train.columns):
-            print("  ✓ Schema matches")
-        else:
-            print("  ✗ Schema mismatch!")
-
-        print("\n" + "=" * 70)
-        print("✓ Synthpop wrapper test PASSED")
-        print("=" * 70)
-
-    except Exception as e:
-        print(f"\n✗ Test FAILED: {e}")
-        import traceback
-
-        traceback.print_exc()
-        sys.exit(1)

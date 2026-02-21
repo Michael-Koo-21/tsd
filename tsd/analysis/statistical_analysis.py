@@ -479,11 +479,3 @@ def run_analysis(filepath: str | Path) -> tuple[str, dict]:
     report = generate_report(df)
 
     return report, results
-
-
-if __name__ == "__main__":
-    import sys
-
-    filepath = sys.argv[1] if len(sys.argv) > 1 else "results/experiments/all_results_complete.csv"
-    report, _ = run_analysis(filepath)
-    print(report)

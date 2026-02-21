@@ -37,7 +37,7 @@ warnings.filterwarnings("ignore")
 
 # Configuration
 RANDOM_SEEDS = [42, 123, 456, 789, 1011]
-RESULTS_DIR = Path("results/experiments")
+RESULTS_DIR = Path(__file__).parent.parent / "results/experiments"
 SYNTHETIC_DIR = RESULTS_DIR / "synthetic_data"
 MEASURES_DIR = RESULTS_DIR / "measures"
 

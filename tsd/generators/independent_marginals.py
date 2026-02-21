@@ -150,29 +150,3 @@ def generate_independent_marginals(
     """
     generator = IndependentMarginalsGenerator(random_state=random_state)
     return generator.fit_sample(df_train, n_samples)
-
-
-if __name__ == "__main__":
-    # Test with preprocessed ACS data
-    from tsd.preprocessing.load_data import preprocess_acs_data
-
-    print("=" * 60)
-    print("Testing Independent Marginals Generator")
-    print("=" * 60)
-
-    # Load and preprocess data (using small sample for testing)
-    df_train, df_test = preprocess_acs_data(sample_size=1000)
-
-    # Generate synthetic data
-    df_synthetic = generate_independent_marginals(
-        df_train=df_train, n_samples=len(df_train), random_state=42
-    )
-
-    print("\nSynthetic data preview:")
-    print(df_synthetic.head())
-
-    print("\nVariable distributions comparison:")
-    for col in df_train.columns:
-        print(f"\n{col}:")
-        print(f"  Real:      {df_train[col].describe()['mean']:.2f} mean")
-        print(f"  Synthetic: {df_synthetic[col].describe()['mean']:.2f} mean")

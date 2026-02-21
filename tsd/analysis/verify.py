@@ -130,10 +130,3 @@ def verify_claims(results_path: str | Path) -> str:
     p("=" * 70)
 
     return "\n".join(lines)
-
-
-if __name__ == "__main__":
-    import sys
-
-    path = sys.argv[1] if len(sys.argv) > 1 else "results/experiments/all_results.csv"
-    print(verify_claims(path))
