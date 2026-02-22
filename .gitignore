@@ -118,6 +118,8 @@ docs/
 # Experiment artifacts
 results/**/checkpoint.json
 results/**/*.txt
+!results/experiments/statistical_analysis_report.txt
+!results/experiments/voi_analysis_report.txt
 results/pilot/
 results/validation_pilot/
 

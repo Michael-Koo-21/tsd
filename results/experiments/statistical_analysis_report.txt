@@ -1,4 +1,3 @@
-<frozen runpy>:128: RuntimeWarning: 'src.analysis.statistical_analysis' found in sys.modules after import of package 'src.analysis', but prior to execution of 'src.analysis.statistical_analysis'; this may result in unpredictable behaviour
 ======================================================================
 STATISTICAL ANALYSIS REPORT
 Synthetic Data Generation Method Comparison
@@ -7,7 +6,7 @@ Synthetic Data Generation Method Comparison
 1. DATA OVERVIEW
 ----------------------------------------
 Total observations: 25
-Methods: ctgan, independent_marginals, dpbn, synthpop, great
+Methods: independent_marginals, ctgan, dpbn, synthpop, great
 Replicates per method: 5
 
 2. DESCRIPTIVE STATISTICS
@@ -16,64 +15,64 @@ Replicates per method: 5
 FIDELITY_AUC:
 Method                     Mean      Std               95% CI
 ------------------------------------------------------------
-dpbn                     0.9395   0.0128     [0.9283, 0.9507]
-independent_marginals    0.8417   0.0094     [0.8335, 0.8500]
-ctgan                    0.8254   0.0080     [0.8184, 0.8324]
-great                    0.6853   0.0084     [0.6780, 0.6926]
-synthpop                 0.4490   0.0054     [0.4443, 0.4537]
+independent_marginals    0.8801   0.0042     [0.8765, 0.8838]
+dpbn                     0.8495   0.0078     [0.8426, 0.8563]
+ctgan                    0.8039   0.0176     [0.7884, 0.8194]
+great                    0.7287   0.0021     [0.7269, 0.7306]
+synthpop                 0.4839   0.0011     [0.4829, 0.4849]
 
 PRIVACY_DCR:
 Method                     Mean      Std               95% CI
 ------------------------------------------------------------
-dpbn                     0.5598   0.0802     [0.4895, 0.6301]
-independent_marginals    0.3268   0.0076     [0.3201, 0.3335]
-ctgan                    0.2091   0.0053     [0.2045, 0.2138]
-great                    0.1279   0.0021     [0.1261, 0.1298]
-synthpop                 0.0842   0.0063     [0.0787, 0.0898]
+independent_marginals    0.1396   0.0013     [0.1384, 0.1407]
+dpbn                     0.1089   0.0022     [0.1069, 0.1108]
+ctgan                    0.0787   0.0063     [0.0732, 0.0842]
+great                    0.0518   0.0002     [0.0516, 0.0521]
+synthpop                 0.0070   0.0010     [0.0062, 0.0079]
 
 UTILITY_TSTR:
 Method                     Mean      Std               95% CI
 ------------------------------------------------------------
-synthpop                 0.9914   0.0093     [0.9833, 0.9996]
-great                    0.9647   0.0108     [0.9553, 0.9742]
-ctgan                    0.8845   0.0200     [0.8670, 0.9020]
-dpbn                     0.8535   0.0134     [0.8417, 0.8652]
-independent_marginals    0.6347   0.0519     [0.5892, 0.6802]
+synthpop                 1.0003   0.0019     [0.9986, 1.0020]
+ctgan                    0.9419   0.0390     [0.9077, 0.9761]
+dpbn                     0.9174   0.0450     [0.8780, 0.9569]
+great                    0.8875   0.0052     [0.8830, 0.8921]
+independent_marginals    0.0371   0.0067     [0.0313, 0.0430]
 
 FAIRNESS_GAP:
 Method                     Mean      Std               95% CI
 ------------------------------------------------------------
-independent_marginals    0.1228   0.0369     [0.0904, 0.1552]
-ctgan                    0.1064   0.0481     [0.0642, 0.1485]
-dpbn                     0.0883   0.0385     [0.0545, 0.1220]
-synthpop                 0.0861   0.0189     [0.0695, 0.1026]
-great                    0.0434   0.0111     [0.0336, 0.0532]
+independent_marginals    0.0802   0.0291     [0.0547, 0.1057]
+great                    0.0767   0.0114     [0.0668, 0.0867]
+dpbn                     0.0620   0.0304     [0.0354, 0.0886]
+ctgan                    0.0589   0.0271     [0.0351, 0.0827]
+synthpop                 0.0271   0.0080     [0.0200, 0.0341]
 
 3. OMNIBUS TESTS (Overall Method Differences)
 ----------------------------------------
 
 FIDELITY_AUC:
-  ANOVA: F=2178.329, p=0.0000
-  Kruskal-Wallis: H=22.737, p=0.0001
-  Effect size (η²): 0.9977 (large)
+  ANOVA: F=1597.774, p=0.0000
+  Kruskal-Wallis: H=23.077, p=0.0001
+  Effect size (η²): 0.9969 (large)
   → Significant differences exist between methods
 
 PRIVACY_DCR:
-  ANOVA: F=138.283, p=0.0000
-  Kruskal-Wallis: H=23.077, p=0.0001
-  Effect size (η²): 0.9651 (large)
+  ANOVA: F=1380.503, p=0.0000
+  Kruskal-Wallis: H=23.121, p=0.0001
+  Effect size (η²): 0.9964 (large)
   → Significant differences exist between methods
 
 UTILITY_TSTR:
-  ANOVA: F=142.937, p=0.0000
-  Kruskal-Wallis: H=22.722, p=0.0001
-  Effect size (η²): 0.9662 (large)
+  ANOVA: F=1128.251, p=0.0000
+  Kruskal-Wallis: H=19.857, p=0.0005
+  Effect size (η²): 0.9956 (large)
   → Significant differences exist between methods
 
 FAIRNESS_GAP:
-  ANOVA: F=3.918, p=0.0166
-  Kruskal-Wallis: H=11.948, p=0.0177
-  Effect size (η²): 0.4393 (large)
+  ANOVA: F=4.104, p=0.0137
+  Kruskal-Wallis: H=10.907, p=0.0276
+  Effect size (η²): 0.4508 (large)
   → Significant differences exist between methods
 
 4. PAIRWISE COMPARISONS (Bonferroni corrected)
@@ -81,63 +80,61 @@ FAIRNESS_GAP:
 
 FIDELITY_AUC (α_adj = 0.0050):
   Significant differences:
-    ctgan < dpbn: d=-10.710 (large), p=0.0000
-    ctgan > synthpop: d=55.438 (large), p=0.0000
-    ctgan > great: d=17.137 (large), p=0.0000
-    independent_marginals < dpbn: d=-8.696 (large), p=0.0000
-    independent_marginals > synthpop: d=51.138 (large), p=0.0000
-    independent_marginals > great: d=17.522 (large), p=0.0000
-    dpbn > synthpop: d=49.986 (large), p=0.0000
-    dpbn > great: d=23.501 (large), p=0.0000
-    synthpop < great: d=-33.572 (large), p=0.0000
+    independent_marginals > ctgan: d=5.949 (large), p=0.0000
+    independent_marginals > dpbn: d=4.904 (large), p=0.0001
+    independent_marginals > synthpop: d=129.826 (large), p=0.0000
+    independent_marginals > great: d=45.922 (large), p=0.0000
+    ctgan < dpbn: d=-3.342 (large), p=0.0007
+    ctgan > synthpop: d=25.601 (large), p=0.0000
+    ctgan > great: d=5.985 (large), p=0.0000
+    dpbn > synthpop: d=65.572 (large), p=0.0000
+    dpbn > great: d=21.137 (large), p=0.0000
+    synthpop < great: d=-144.354 (large), p=0.0000
 
 PRIVACY_DCR (α_adj = 0.0050):
   Significant differences:
-    ctgan < independent_marginals: d=-17.873 (large), p=0.0000
-    ctgan < dpbn: d=-6.169 (large), p=0.0000
-    ctgan > synthpop: d=21.392 (large), p=0.0000
-    ctgan > great: d=20.017 (large), p=0.0000
-    independent_marginals < dpbn: d=-4.089 (large), p=0.0002
-    independent_marginals > synthpop: d=34.659 (large), p=0.0000
-    independent_marginals > great: d=35.519 (large), p=0.0000
-    dpbn > synthpop: d=8.359 (large), p=0.0000
-    dpbn > great: d=7.611 (large), p=0.0000
-    synthpop < great: d=-9.294 (large), p=0.0000
+    independent_marginals > ctgan: d=13.373 (large), p=0.0000
+    independent_marginals > dpbn: d=16.724 (large), p=0.0000
+    independent_marginals > synthpop: d=113.788 (large), p=0.0000
+    independent_marginals > great: d=91.028 (large), p=0.0000
+    ctgan < dpbn: d=-6.393 (large), p=0.0000
+    ctgan > synthpop: d=15.908 (large), p=0.0000
+    ctgan > great: d=6.024 (large), p=0.0000
+    dpbn > synthpop: d=59.555 (large), p=0.0000
+    dpbn > great: d=36.098 (large), p=0.0000
+    synthpop < great: d=-64.438 (large), p=0.0000
 
 UTILITY_TSTR (α_adj = 0.0050):
   Significant differences:
-    ctgan > independent_marginals: d=6.351 (large), p=0.0000
-    ctgan < synthpop: d=-6.872 (large), p=0.0000
-    ctgan < great: d=-5.000 (large), p=0.0000
-    independent_marginals < dpbn: d=-5.772 (large), p=0.0000
-    independent_marginals < synthpop: d=-9.568 (large), p=0.0000
-    independent_marginals < great: d=-8.803 (large), p=0.0000
-    dpbn < synthpop: d=-11.969 (large), p=0.0000
-    dpbn < great: d=-9.139 (large), p=0.0000
-    synthpop > great: d=2.659 (large), p=0.0030
+    independent_marginals < ctgan: d=-32.342 (large), p=0.0000
+    independent_marginals < dpbn: d=-27.339 (large), p=0.0000
+    independent_marginals < synthpop: d=-195.433 (large), p=0.0000
+    independent_marginals < great: d=-141.599 (large), p=0.0000
+    dpbn < synthpop: d=-2.600 (large), p=0.0034
+    synthpop > great: d=28.660 (large), p=0.0000
 
 FAIRNESS_GAP (α_adj = 0.0050):
   Significant differences:
-    independent_marginals > great: d=2.912 (large), p=0.0017
-    synthpop > great: d=2.752 (large), p=0.0024
+    independent_marginals > synthpop: d=2.491 (large), p=0.0043
+    synthpop < great: d=-5.046 (large), p=0.0000
 
 5. METRIC CORRELATIONS (Trade-off Analysis)
 ----------------------------------------
 Spearman correlations between method-level means:
   fidelity_auc_vs_privacy_dcr: ρ=1.000 (strong positive)
-  fidelity_auc_vs_utility_tstr: ρ=-0.900 (strong negative)
-  fidelity_auc_vs_fairness_gap: ρ=0.600 (moderate positive)
-  privacy_dcr_vs_utility_tstr: ρ=-0.900 (strong negative)
-  privacy_dcr_vs_fairness_gap: ρ=0.600 (moderate positive)
-  utility_tstr_vs_fairness_gap: ρ=-0.800 (strong negative)
+  fidelity_auc_vs_utility_tstr: ρ=-0.700 (moderate negative)
+  fidelity_auc_vs_fairness_gap: ρ=0.700 (moderate positive)
+  privacy_dcr_vs_utility_tstr: ρ=-0.700 (moderate negative)
+  privacy_dcr_vs_fairness_gap: ρ=0.700 (moderate positive)
+  utility_tstr_vs_fairness_gap: ρ=-1.000 (strong negative)
 
 6. KEY FINDINGS SUMMARY
 ----------------------------------------
 Best performing method by metric:
   • Fidelity AUC (lower=better, closer to 0.5): synthpop
-  • Privacy DCR (higher=better): dpbn
+  • Privacy DCR (higher=better): independent_marginals
   • Utility TSTR (higher=better): synthpop
-  • Fairness Gap (lower=better): great
+  • Fairness Gap (lower=better): synthpop
 
 ======================================================================
 END OF REPORT

@@ -85,3 +85,63 @@ class TestEfficiency:
     def test_adds_efficiency_column(self, sample_results):
         df = add_efficiency_data(sample_results)
         assert "efficiency_time" in df.columns
+
+    def test_preserves_existing_efficiency_time(self, sample_results):
+        sample_results["efficiency_time"] = 99.0
+        df = add_efficiency_data(sample_results)
+        assert (df["efficiency_time"] == 99.0).all()
+
+    def test_converts_generation_time_min(self, sample_results):
+        sample_results["generation_time_min"] = 5.0
+        df = add_efficiency_data(sample_results)
+        assert (df["efficiency_time"] == 5.0).all()
+
+    def test_converts_generation_time_sec(self, sample_results):
+        sample_results["generation_time_sec"] = 120.0
+        df = add_efficiency_data(sample_results)
+        assert (df["efficiency_time"] == 2.0).all()
+
+
+class TestZscoreNormalization:
+    def test_zscore_output_range(self, sample_results):
+        scores = get_method_scores(sample_results)
+        normalized = normalize_scores(scores, method="zscore")
+        for col in normalized.columns:
+            if col in METRIC_DIRECTION:
+                assert normalized[col].min() >= -1e-9
+                assert normalized[col].max() <= 1.0 + 1e-9
+
+    def test_constant_column_zscore(self):
+        """Constant values should produce identical normalized values."""
+        scores = pd.DataFrame(
+            {"fidelity_auc": [0.7, 0.7, 0.7]},
+            index=["a", "b", "c"],
+        )
+        normalized = normalize_scores(scores, method="zscore")
+        # All values should be the same (whether 0.5 or not depends on float precision)
+        assert normalized["fidelity_auc"].nunique() == 1
+
+
+class TestGenerateRecommendation:
+    def test_returns_string(self, sample_results):
+        from tsd.analysis.mada_framework import generate_recommendation
+
+        weights = PROFILES["balanced"].weights
+        report = generate_recommendation(sample_results, weights, "Balanced")
+        assert isinstance(report, str)
+
+    def test_contains_recommendation_section(self, sample_results):
+        from tsd.analysis.mada_framework import generate_recommendation
+
+        weights = PROFILES["balanced"].weights
+        report = generate_recommendation(sample_results, weights, "Balanced")
+        assert "RECOMMENDATION" in report
+        assert "METHOD RANKINGS" in report
+        assert "TRADE-OFF" in report
+
+    def test_all_profiles_produce_output(self, sample_results):
+        from tsd.analysis.mada_framework import generate_recommendation
+
+        for profile_id, profile in PROFILES.items():
+            report = generate_recommendation(sample_results, profile.weights, profile.name)
+            assert len(report) > 100

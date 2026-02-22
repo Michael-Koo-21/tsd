@@ -1,5 +1,7 @@
 # TrustingSyntheticData
 
+[![Tests](https://github.com/MichaelKoo21/TrustingSyntheticData/actions/workflows/test.yml/badge.svg)](https://github.com/MichaelKoo21/TrustingSyntheticData/actions/workflows/test.yml)
+
 A Multiattribute Decision Analysis (MADA) framework for evaluating and selecting synthetic data generation methods.
 
 ## Overview
@@ -101,13 +103,17 @@ tsd verify --results results/experiments/all_results.csv
 
 ## Methods Evaluated
 
-| Method | Type | Fidelity | Privacy | Utility | Best For |
-|--------|------|----------|---------|---------|----------|
-| DP-BN (PrivBayes) | Bayesian Network | 0.95 | 0.56 | 0.85 | Privacy-critical apps |
-| CTGAN | Deep Learning | 0.94 | 0.38 | 0.34 | Complex patterns |
-| Indep. Marginals | Baseline | 0.88 | 0.33 | 0.63 | Quick baseline |
-| GReaT | Transformer/LLM | 0.76 | 0.15 | 0.96 | High utility needs |
-| Synthpop | Statistical/CART | 0.63 | 0.08 | 0.99 | Fairness + utility |
+*Raw metric means across 5 replicates. Fidelity AUC: closer to 0.5 = better. Privacy DCR: higher = better. Utility TSTR: higher = better. Fairness Gap: lower = better.*
+
+| Method | Type | Fidelity AUC | Privacy DCR | Utility TSTR | Fairness Gap |
+|--------|------|:------------:|:-----------:|:------------:|:------------:|
+| DP-BN (PrivBayes) | Bayesian Network | 0.85 | 0.11 | 0.92 | 0.06 |
+| CTGAN | Deep Learning | 0.80 | 0.08 | 0.94 | 0.06 |
+| Indep. Marginals | Baseline | 0.88 | 0.14 | 0.04 | 0.08 |
+| GReaT | Transformer/LLM | 0.73 | 0.05 | 0.89 | 0.08 |
+| Synthpop | Statistical/CART | 0.48 | 0.01 | 1.00 | 0.03 |
+
+**Note on Membership Inference:** The membership inference attack metric (`privacy_mi_auc`) was evaluated but the attack classifier could not distinguish train from test records on this dataset (AUC = 0.50, essentially random). This is expected for a large public survey dataset with random train/test splits. Privacy is measured by **Distance to Closest Record (DCR)**, which is the operative privacy metric in our analysis.
 
 ### GReaT Generator Notes
 
