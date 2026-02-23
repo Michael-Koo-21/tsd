@@ -10,14 +10,21 @@ References:
 """
 
 import random
-import warnings
 from typing import Optional
 
 import numpy as np
 import pandas as pd
-import torch
 
-warnings.filterwarnings("ignore")
+try:
+    import torch
+except ImportError:
+    torch = None
+
+
+def _require_torch():
+    """Raise a helpful error if torch is not installed."""
+    if torch is None:
+        raise ImportError("PyTorch is required for GReaT. Install with: pip install -e '.[great]'")
 
 
 def get_best_device() -> str:
@@ -27,6 +34,7 @@ def get_best_device() -> str:
     Returns:
         str: 'cuda' for NVIDIA GPU, 'mps' for Apple Silicon, 'cpu' otherwise
     """
+    _require_torch()
     if torch.cuda.is_available():
         return "cuda"
     elif torch.backends.mps.is_available():
@@ -37,6 +45,7 @@ def get_best_device() -> str:
 
 def set_all_seeds(seed: int):
     """Set all random seeds for reproducibility."""
+    _require_torch()
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
@@ -175,6 +184,7 @@ class GReaTGenerator:
             print(f"  Using device: {device}")
 
         # Check device availability and fallback
+        _require_torch()
         if device == "cuda" and not torch.cuda.is_available():
             print("  Warning: CUDA not available, falling back to CPU")
             device = "cpu"

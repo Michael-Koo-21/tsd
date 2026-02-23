@@ -84,7 +84,13 @@ class TestLoadAndComputeValues:
         sample_results.to_csv(f, index=False)
         result = load_and_compute_values(f)
         for method, scores in result.items():
-            assert set(scores.keys()) == {"fidelity", "privacy", "utility", "fairness", "efficiency"}
+            assert set(scores.keys()) == {
+                "fidelity",
+                "privacy",
+                "utility",
+                "fairness",
+                "efficiency",
+            }
 
     def test_values_in_range(self, tmp_path, sample_results):
         f = tmp_path / "results.csv"
@@ -106,17 +112,32 @@ class TestCalculateWeightedScore:
                 "efficiency": 0.5,
             }
         }
-        weights = {"fidelity": 0.2, "privacy": 0.2, "utility": 0.2,
-                   "fairness": 0.2, "efficiency": 0.2}
+        weights = {
+            "fidelity": 0.2,
+            "privacy": 0.2,
+            "utility": 0.2,
+            "fairness": 0.2,
+            "efficiency": 0.2,
+        }
         result = calculate_weighted_score(value_scores, "test_method", weights)
         assert result == pytest.approx(0.5)
 
     def test_weighted_sum(self):
         value_scores = {
-            "m": {"fidelity": 1.0, "privacy": 0.0, "utility": 0.0,
-                  "fairness": 0.0, "efficiency": 0.0}
+            "m": {
+                "fidelity": 1.0,
+                "privacy": 0.0,
+                "utility": 0.0,
+                "fairness": 0.0,
+                "efficiency": 0.0,
+            }
         }
-        weights = {"fidelity": 0.5, "privacy": 0.1, "utility": 0.2,
-                   "fairness": 0.1, "efficiency": 0.1}
+        weights = {
+            "fidelity": 0.5,
+            "privacy": 0.1,
+            "utility": 0.2,
+            "fairness": 0.1,
+            "efficiency": 0.1,
+        }
         result = calculate_weighted_score(value_scores, "m", weights)
         assert result == pytest.approx(0.5)

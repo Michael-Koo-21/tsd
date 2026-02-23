@@ -14,4 +14,6 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - run: pip install -e ".[dev]"
-      - run: pytest --cov=tsd
+      - run: black --check .
+      - run: ruff check .
+      - run: pytest --cov=tsd --cov-fail-under=40

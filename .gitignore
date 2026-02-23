@@ -118,6 +118,7 @@ docs/
 # Experiment artifacts
 results/**/checkpoint.json
 results/**/*.txt
+results/**/*.log
 !results/experiments/statistical_analysis_report.txt
 !results/experiments/voi_analysis_report.txt
 results/pilot/

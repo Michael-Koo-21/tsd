@@ -79,8 +79,7 @@ tsd analyze --results results/experiments/all_results.csv
 ### Get Method Recommendation
 
 ```bash
-# Available profiles: privacy_focused, utility_focused, balanced,
-#                    fidelity_focused, fairness_focused
+# Available profiles: privacy_first, utility_first, balanced
 tsd recommend --results results/experiments/all_results.csv --profile balanced
 ```
 
@@ -90,7 +89,7 @@ Or via Python:
 from tsd.analysis import generate_recommendation, load_results, PROFILES
 
 df = load_results("results/experiments/all_results.csv")
-profile = PROFILES["privacy_focused"]
+profile = PROFILES["privacy_first"]
 recommendation = generate_recommendation(df, profile.weights, profile.name)
 print(recommendation)
 ```

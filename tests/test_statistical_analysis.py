@@ -1,7 +1,6 @@
 """Tests for tsd.analysis.statistical_analysis."""
 
 import pandas as pd
-import pytest
 
 from tsd.analysis.statistical_analysis import (
     correlation_analysis,
@@ -95,13 +94,15 @@ class TestDataQualityCheck:
         assert result["n_issues"] == 0
 
     def test_detects_constant_values(self):
-        df = pd.DataFrame({
-            "method": ["a"] * 3 + ["b"] * 3,
-            "fidelity_auc": [0.5, 0.5, 0.5, 0.6, 0.7, 0.8],
-            "privacy_dcr": [0.1, 0.2, 0.3, 0.1, 0.2, 0.3],
-            "utility_tstr": [0.9, 0.9, 0.9, 0.8, 0.8, 0.8],
-            "fairness_gap": [0.05, 0.06, 0.07, 0.05, 0.06, 0.07],
-        })
+        df = pd.DataFrame(
+            {
+                "method": ["a"] * 3 + ["b"] * 3,
+                "fidelity_auc": [0.5, 0.5, 0.5, 0.6, 0.7, 0.8],
+                "privacy_dcr": [0.1, 0.2, 0.3, 0.1, 0.2, 0.3],
+                "utility_tstr": [0.9, 0.9, 0.9, 0.8, 0.8, 0.8],
+                "fairness_gap": [0.05, 0.06, 0.07, 0.05, 0.06, 0.07],
+            }
+        )
         result = data_quality_check(df)
         assert result["n_issues"] >= 1
         types = [i["type"] for i in result["issues"]]

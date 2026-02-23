@@ -3,10 +3,6 @@ DP Bayesian Network Generator
 
 Privacy-preserving method using differential privacy with Bayesian networks.
 
-Based on study_design_spec.md Section 3.3: "PrivBayes-inspired implementation
-with epsilon=1.0. Provides formal differential privacy guarantee while
-maintaining utility through Bayesian network structure learning."
-
 Uses DataSynthesizer package with PrivBayes algorithm.
 
 Privacy Guarantee:

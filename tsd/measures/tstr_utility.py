@@ -7,9 +7,6 @@ Compares performance to a classifier trained on real training data (gold standar
 F1 Ratio = 1.0 means synthetic data achieves parity with real data.
 F1 Ratio < 1.0 means synthetic data has lower utility.
 
-Based on study_design_spec.md Section 4.2.3: "Train gradient boosting classifier
-on synthetic data, evaluate on real test set, compare to real-trained baseline."
-
 Classifier Hyperparameters (Fixed, No Tuning):
 - Model: GradientBoostingClassifier (sklearn)
 - n_estimators: 100 (number of boosting stages)

@@ -5,9 +5,6 @@ Baseline method that generates synthetic data by sampling from independent
 marginal distributions. This method captures univariate distributions but
 ignores all correlations between variables.
 
-Based on study_design_spec.md Section 3.1: "Samples independently from each
-variable's empirical distribution. Captures univariate statistics perfectly
-but destroys all relationships."
 """
 
 from typing import Optional

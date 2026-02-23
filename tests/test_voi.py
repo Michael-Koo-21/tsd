@@ -1,6 +1,5 @@
 """Tests for tsd.analysis.voi_analysis."""
 
-import numpy as np
 import pandas as pd
 import pytest
 
@@ -40,8 +39,12 @@ class TestNormalizeToValue:
 
     def test_constant_column_gets_half(self):
         df = pd.DataFrame(
-            {"fidelity_auc": [0.7, 0.7], "privacy_dcr": [0.1, 0.1],
-             "utility_tstr": [0.9, 0.9], "fairness_gap": [0.05, 0.05]},
+            {
+                "fidelity_auc": [0.7, 0.7],
+                "privacy_dcr": [0.1, 0.1],
+                "utility_tstr": [0.9, 0.9],
+                "fairness_gap": [0.05, 0.05],
+            },
             index=["a", "b"],
         )
         values = normalize_to_value(df)
@@ -52,8 +55,13 @@ class TestComputeMethodValue:
     def test_returns_series(self, sample_results):
         means, _ = get_method_performance(sample_results)
         values = normalize_to_value(means)
-        weights = {"fidelity": 0.25, "privacy": 0.25, "utility": 0.25,
-                   "fairness": 0.15, "efficiency": 0.10}
+        weights = {
+            "fidelity": 0.25,
+            "privacy": 0.25,
+            "utility": 0.25,
+            "fairness": 0.15,
+            "efficiency": 0.10,
+        }
         result = compute_method_value(values, weights)
         assert isinstance(result, pd.Series)
         assert len(result) == 5
@@ -61,8 +69,13 @@ class TestComputeMethodValue:
     def test_values_nonnegative(self, sample_results):
         means, _ = get_method_performance(sample_results)
         values = normalize_to_value(means)
-        weights = {"fidelity": 0.25, "privacy": 0.25, "utility": 0.25,
-                   "fairness": 0.15, "efficiency": 0.10}
+        weights = {
+            "fidelity": 0.25,
+            "privacy": 0.25,
+            "utility": 0.25,
+            "fairness": 0.15,
+            "efficiency": 0.10,
+        }
         result = compute_method_value(values, weights)
         assert (result >= 0).all()
 
@@ -73,14 +86,16 @@ class TestStrategies:
         assert strategy_s1_random(vals) == pytest.approx(0.5)
 
     def test_s2_heuristic_privacy_first(self):
-        vals = pd.Series({"dpbn": 0.8, "ctgan": 0.6, "great": 0.5,
-                          "synthpop": 0.4, "independent_marginals": 0.3})
+        vals = pd.Series(
+            {"dpbn": 0.8, "ctgan": 0.6, "great": 0.5, "synthpop": 0.4, "independent_marginals": 0.3}
+        )
         result = strategy_s2_heuristic(vals, "privacy_first")
         assert result == 0.8
 
     def test_s2_heuristic_unknown_archetype(self):
-        vals = pd.Series({"dpbn": 0.8, "ctgan": 0.6, "great": 0.5,
-                          "synthpop": 0.4, "independent_marginals": 0.3})
+        vals = pd.Series(
+            {"dpbn": 0.8, "ctgan": 0.6, "great": 0.5, "synthpop": 0.4, "independent_marginals": 0.3}
+        )
         result = strategy_s2_heuristic(vals, "unknown")
         assert result == 0.4  # falls back to synthpop
 

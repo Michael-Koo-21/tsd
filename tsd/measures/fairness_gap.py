@@ -7,10 +7,6 @@ subgroup and reporting the maximum gap between any subgroup and the overall util
 Lower gap = more fair (all subgroups achieve similar utility)
 Higher gap = less fair (some subgroups disadvantaged)
 
-Based on study_design_spec.md Section 4.2.4: "Compute TSTR F1 ratio separately for
-each demographic subgroup. Report the maximum absolute difference between any subgroup's
-ratio and the overall ratio."
-
 Reference:
 - Xu, R., Baracaldo, N., Zhou, Y., Anwar, A., & Ludwig, H. (2021). HyFed: A
   hybrid federated framework for privacy-preserving machine learning. In

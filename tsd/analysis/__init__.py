@@ -4,7 +4,7 @@ Analysis utilities for experiments.
 Includes:
 - Statistical analysis (ANOVA, pairwise comparisons, effect sizes)
 - Results aggregation
-- Visualization utilities (coming soon)
+- Visualization utilities
 """
 
 from tsd.constants import PROFILES, UserProfile

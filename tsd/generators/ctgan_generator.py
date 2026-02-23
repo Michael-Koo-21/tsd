@@ -3,9 +3,6 @@ CTGAN Generator
 
 Deep learning method using Conditional Tabular GAN (CTGAN) for synthetic data generation.
 
-Based on study_design_spec.md Section 3.2: "Conditional Tabular GAN with mode-
-specific normalization. Strong baseline for capturing complex relationships."
-
 Reference: Xu, L., Skoularidou, M., Cuesta-Infante, A., & Veeramachaneni, K. (2019).
 Modeling Tabular Data using Conditional GAN. NeurIPS 2019.
 """

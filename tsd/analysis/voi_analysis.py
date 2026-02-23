@@ -453,9 +453,7 @@ def print_report(results: List[VOIResults]) -> None:
 def main(filepath: str | Path = None):
     """Run VOI analysis and print results."""
     if filepath is None:
-        filepath = (
-            Path(__file__).parent.parent.parent / "results/experiments/all_results_complete.csv"
-        )
+        filepath = Path(__file__).parent.parent.parent / "results/experiments/all_results.csv"
 
     df = load_results(filepath)
     results = run_voi_analysis(df)

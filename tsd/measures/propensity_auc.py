@@ -4,10 +4,6 @@ Propensity AUC Measure
 Measures how well a classifier can distinguish between real and synthetic data.
 Lower AUC is better - indicates synthetic data is more similar to real data.
 
-Based on study_design_spec.md Section 4.1.1: "Train gradient boosting classifier
-to distinguish real (label=1) from synthetic (label=0). AUC close to 0.5 indicates
-indistinguishability; close to 1.0 indicates easily detectable synthetic data."
-
 Reference: Snoke, J., Raab, G. M., Nowok, B., Dibben, C., & Slavkovic, A. (2018).
 General and specific utility measures for synthetic data. JRSS-A, 181(3), 663-688.
 
