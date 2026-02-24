@@ -143,73 +143,76 @@ def generate_mada_profile_comparison(value_scores, output_dir):
 
 
 def generate_pareto_frontier(df, output_dir):
-    """Generate the Pareto frontier figure (Fidelity vs Utility)."""
+    """Generate the Pareto frontier figure (Privacy vs Fidelity).
+
+    Both axes use higher = better:
+      x-axis: Privacy (DCR 5th Percentile) — higher DCR = better privacy
+      y-axis: Fidelity (1 - Propensity AUC) — higher value = better fidelity
+    """
     import matplotlib.pyplot as plt
 
     plt.style.use("seaborn-v0_8-whitegrid")
-    summary = df.groupby("method").agg({"fidelity_auc": "mean", "utility_tstr": "mean"})
+    summary = df.groupby("method").agg({"fidelity_auc": "mean", "privacy_dcr": "mean"})
 
     fig, ax = plt.subplots(figsize=(10, 8))
 
     for method in summary.index:
-        fid = summary.loc[method, "fidelity_auc"]
-        util = summary.loc[method, "utility_tstr"]
+        priv = summary.loc[method, "privacy_dcr"]
+        fid = 1 - summary.loc[method, "fidelity_auc"]
 
-        ax.scatter(fid, util, s=200, c=COLORS[method], edgecolors="black", linewidth=1.5, zorder=3)
+        ax.scatter(
+            priv, fid, s=200, c=COLORS[method], edgecolors="black", linewidth=1.5, zorder=3
+        )
 
-        offset = (10, 10) if method != "synthpop" else (-60, 10)
+        offset = (10, 10) if method != "independent" else (10, -15)
         ax.annotate(
             METHOD_LABELS[method],
-            (fid, util),
+            (priv, fid),
             textcoords="offset points",
             xytext=offset,
             fontsize=10,
             fontweight="bold",
         )
 
-    # Identify Pareto-optimal methods
+    # Identify Pareto-optimal methods (higher on both axes = better)
     pareto_methods = []
     for method in summary.index:
-        fid = summary.loc[method, "fidelity_auc"]
-        util = summary.loc[method, "utility_tstr"]
+        priv = summary.loc[method, "privacy_dcr"]
+        fid = 1 - summary.loc[method, "fidelity_auc"]
         dominated = False
         for other in summary.index:
             if other == method:
                 continue
-            o_fid = summary.loc[other, "fidelity_auc"]
-            o_util = summary.loc[other, "utility_tstr"]
-            if o_fid <= fid and o_util >= util and (o_fid < fid or o_util > util):
+            o_priv = summary.loc[other, "privacy_dcr"]
+            o_fid = 1 - summary.loc[other, "fidelity_auc"]
+            if o_priv >= priv and o_fid >= fid and (o_priv > priv or o_fid > fid):
                 dominated = True
                 break
         if not dominated:
-            pareto_methods.append((fid, util, method))
+            pareto_methods.append((priv, fid, method))
 
     pareto_methods.sort(key=lambda x: x[0])
 
-    for fid, util, _method in pareto_methods:
-        ax.scatter(fid, util, s=350, facecolors="none", edgecolors="gold", linewidth=3, zorder=2)
+    for priv, fid, _method in pareto_methods:
+        ax.scatter(priv, fid, s=350, facecolors="none", edgecolors="gold", linewidth=3, zorder=2)
 
     if len(pareto_methods) > 1:
-        fids = [p[0] for p in pareto_methods]
-        utils = [p[1] for p in pareto_methods]
-        ax.plot(fids, utils, "k--", linewidth=2, alpha=0.5, zorder=1)
+        privs = [p[0] for p in pareto_methods]
+        fids = [p[1] for p in pareto_methods]
+        ax.plot(privs, fids, "k--", linewidth=2, alpha=0.5, zorder=1)
 
-    ax.set_xlabel("Fidelity (Propensity AUC) \u2192", fontsize=12)
-    ax.set_ylabel("Utility (TSTR) \u2192", fontsize=12)
+    ax.set_xlabel("Privacy (DCR 5th Percentile) \u2192", fontsize=12)
+    ax.set_ylabel("Fidelity (1 \u2212 Propensity AUC) \u2192", fontsize=12)
     ax.set_title(
-        "Pareto Frontier: Fidelity vs Utility\n(Gold circles = Pareto optimal)",
+        "Pareto Frontier: Privacy vs Fidelity\n(Gold circles = Pareto optimal)",
         fontsize=14,
         fontweight="bold",
     )
 
     for m in summary.index:
         ax.scatter([], [], c=COLORS[m], s=100, label=METHOD_LABELS[m])
-    ax.legend(loc="lower left", fontsize=9)
+    ax.legend(loc="center right", fontsize=9)
 
-    ax.axhline(y=0.7, color="gray", linestyle=":", alpha=0.5)
-    ax.axvline(x=0.85, color="gray", linestyle=":", alpha=0.5)
-    ax.set_xlim(0.4, 0.95)
-    ax.set_ylim(0, 1.1)
     ax.grid(True, alpha=0.3)
 
     plt.tight_layout()
