@@ -10,6 +10,7 @@ categorical_columns:
   - "RACETH"
   - "SCHL_RECODED"
   - "MAR"
+  - "ESR"
   - "POBP_RECODED"
 continuous_columns:
   - "AGEP"

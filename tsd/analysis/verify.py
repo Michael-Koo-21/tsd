@@ -84,7 +84,7 @@ def verify_claims(results_path: str | Path) -> str:
     efficiency = {
         "independent_marginals": 1.0,
         "synthpop": 1.0,
-        "ctgan": 0.95,
+        "ctgan": 0.90,
         "dpbn": 1.0,
         "great": 0.24,
     }

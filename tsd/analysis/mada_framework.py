@@ -192,6 +192,156 @@ def sensitivity_analysis(
     return pd.DataFrame(results)
 
 
+def monte_carlo_optimality(
+    df: pd.DataFrame,
+    weights: dict[str, float],
+    n_simulations: int = 10000,
+    seed: int = 42,
+) -> pd.DataFrame:
+    """
+    Compute probability of optimality for each method via Monte Carlo simulation.
+
+    Samples performance metrics from Normal(mean, std) estimated from replicates,
+    normalizes, computes weighted value, and records which method is optimal.
+
+    Args:
+        df: Raw results DataFrame with 'method' column and metric columns.
+        weights: Dict mapping attributes to weights (must sum to 1.0).
+        n_simulations: Number of Monte Carlo draws.
+        seed: Random seed for reproducibility.
+
+    Returns:
+        DataFrame with columns: method, p_optimal, mean_rank, rank_ci_low, rank_ci_high.
+    """
+    rng = np.random.default_rng(seed)
+
+    metrics = [m for m in METRIC_MAP.keys() if m in df.columns]
+    means = df.groupby("method")[metrics].mean()
+    stds = df.groupby("method")[metrics].std().fillna(0)
+    methods = means.index.tolist()
+
+    optimal_counts = {m: 0 for m in methods}
+    all_ranks = {m: [] for m in methods}
+
+    for _ in range(n_simulations):
+        # Sample performance for each method/metric
+        sampled = means.copy()
+        for metric in metrics:
+            noise = rng.normal(0, stds[metric].values)
+            sampled[metric] = means[metric].values + noise
+
+        # Normalize (min-max with direction handling)
+        normalized = sampled.copy()
+        for metric in metrics:
+            col = sampled[metric]
+            mn, mx = col.min(), col.max()
+            if mx > mn:
+                normalized[metric] = (col - mn) / (mx - mn)
+            else:
+                normalized[metric] = 0.5
+            if not METRIC_DIRECTION.get(metric, True):
+                normalized[metric] = 1 - normalized[metric]
+
+        # Add efficiency if in weights
+        if "efficiency" in weights:
+            normalized["efficiency_time"] = pd.Series(
+                {m: DEFAULT_RUNTIME_MINUTES.get(m, 1.0) for m in methods}
+            )
+            # Efficiency normalization (lower time = better)
+            col = normalized["efficiency_time"]
+            mn, mx = col.min(), col.max()
+            if mx > mn:
+                normalized["efficiency_time"] = 1 - (col - mn) / (mx - mn)
+            else:
+                normalized["efficiency_time"] = 0.5
+
+        # Compute weighted scores
+        scores = calculate_weighted_scores(normalized, weights)
+
+        # Record optimal and ranks
+        ranks = scores.rank(ascending=False)
+        optimal_method = scores.idxmax()
+        optimal_counts[optimal_method] += 1
+        for m in methods:
+            all_ranks[m].append(ranks[m])
+
+    # Compile results
+    results = []
+    for m in methods:
+        ranks_arr = np.array(all_ranks[m])
+        results.append(
+            {
+                "method": m,
+                "p_optimal": optimal_counts[m] / n_simulations,
+                "mean_rank": np.mean(ranks_arr),
+                "rank_ci_low": int(np.percentile(ranks_arr, 2.5)),
+                "rank_ci_high": int(np.percentile(ranks_arr, 97.5)),
+            }
+        )
+
+    return pd.DataFrame(results).sort_values("p_optimal", ascending=False)
+
+
+def value_function_sensitivity(
+    df: pd.DataFrame,
+    weights: dict[str, float],
+) -> pd.DataFrame:
+    """
+    Test robustness to alternative value function forms.
+
+    Evaluates five value function specifications:
+    - linear: standard min-max (v = x_norm)
+    - concave: diminishing returns (v = sqrt(x_norm))
+    - convex: increasing returns (v = x_norm^2)
+    - logistic: S-curve (v = 1/(1+exp(-10*(x_norm - 0.5))))
+    - step: threshold (v = 1 if x_norm > 0.5 else 0)
+
+    Args:
+        df: Raw results DataFrame.
+        weights: Dict mapping attributes to weights.
+
+    Returns:
+        DataFrame with columns: method, vf_form, value, rank.
+    """
+    scores = get_method_scores(df)
+    # Base min-max normalization
+    base_norm = normalize_scores(scores)
+
+    def apply_vf(normalized: pd.DataFrame, form: str) -> pd.DataFrame:
+        result = normalized.copy()
+        metrics = [m for m in METRIC_MAP.keys() if m in result.columns]
+        for metric in metrics:
+            x = normalized[metric].values
+            if form == "linear":
+                pass  # Already linear
+            elif form == "concave":
+                result[metric] = np.sqrt(x)
+            elif form == "convex":
+                result[metric] = x**2
+            elif form == "logistic":
+                result[metric] = 1.0 / (1.0 + np.exp(-10 * (x - 0.5)))
+            elif form == "step":
+                result[metric] = np.where(x > 0.5, 1.0, 0.0)
+        return result
+
+    results = []
+    for form in ["linear", "concave", "convex", "logistic", "step"]:
+        transformed = apply_vf(base_norm, form)
+        weighted = calculate_weighted_scores(transformed, weights)
+        ranking = weighted.rank(ascending=False)
+        for method in weighted.index:
+            results.append(
+                {
+                    "method": method,
+                    "vf_form": form,
+                    "value": weighted[method],
+                    "rank": int(ranking[method]),
+                }
+            )
+
+    return pd.DataFrame(results)
+
+
 def generate_recommendation(
     df: pd.DataFrame, weights: dict[str, float], profile_name: str = "Custom"
 ) -> str:
