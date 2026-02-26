@@ -7,6 +7,7 @@ from tsd.analysis.voi_analysis import (
     compute_method_value,
     format_results_tables,
     get_method_performance,
+    inflation_factor_sensitivity,
     normalize_to_value,
     run_voi_analysis,
     strategy_s1_random,
@@ -119,15 +120,43 @@ class TestRunVOIAnalysis:
         """
         results = run_voi_analysis(sample_results, n_simulations=5000, seed=42)
         for r in results:
-            assert r.oracle >= r.s4_benchmark - 0.02, (
-                f"{r.archetype}: Oracle ({r.oracle:.4f}) < S4 ({r.s4_benchmark:.4f})"
-            )
+            assert (
+                r.oracle >= r.s4_benchmark - 0.02
+            ), f"{r.archetype}: Oracle ({r.oracle:.4f}) < S4 ({r.s4_benchmark:.4f})"
 
     def test_voi_decomposition_sums(self, sample_results):
         results = run_voi_analysis(sample_results, n_simulations=100, seed=42)
         for r in results:
             expected_total = r.s4_benchmark - r.s1_random
             assert r.total_improvement == pytest.approx(expected_total, abs=1e-9)
+
+
+class TestInflationFactorSensitivity:
+    def test_returns_dict_with_factors(self, sample_results):
+        result = inflation_factor_sensitivity(
+            sample_results, factors=[1.0, 1.5, 2.0], n_simulations=100, seed=42
+        )
+        assert "by_factor" in result
+        assert "summary" in result
+        assert 1.0 in result["by_factor"]
+        assert 1.5 in result["by_factor"]
+        assert 2.0 in result["by_factor"]
+
+    def test_higher_inflation_increases_evpi_gap(self, sample_results):
+        result = inflation_factor_sensitivity(
+            sample_results, factors=[1.0, 2.0], n_simulations=1000, seed=42
+        )
+        gap_low = result["by_factor"][1.0]["mean_evpi_gap"]
+        gap_high = result["by_factor"][2.0]["mean_evpi_gap"]
+        # Higher inflation should generally increase Oracle-S4 gap
+        assert gap_high >= gap_low - 0.05  # Allow small MC noise
+
+    def test_summary_range(self, sample_results):
+        result = inflation_factor_sensitivity(
+            sample_results, factors=[1.0, 1.5, 2.0], n_simulations=100, seed=42
+        )
+        lo, hi = result["summary"]["mean_pct_prioritization_range"]
+        assert 0 <= lo <= hi <= 100
 
 
 class TestFormatResultsTables:

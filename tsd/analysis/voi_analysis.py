@@ -13,7 +13,7 @@ This module computes:
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Any, Dict, List, Tuple
 
 import numpy as np
 import pandas as pd
@@ -327,6 +327,81 @@ def run_voi_analysis(
         )
 
     return results
+
+
+def inflation_factor_sensitivity(
+    df: pd.DataFrame,
+    factors: List[float] | None = None,
+    n_simulations: int = 10000,
+    prior_noise: float = 0.15,
+    seed: int = 42,
+) -> Dict[str, Any]:
+    """
+    Sensitivity analysis of VOI results to the uncertainty inflation factor.
+
+    The inflation factor (default 1.5x) scales replicate standard deviations to
+    approximate cross-dataset variability. This parameter directly affects EVPI
+    and the VOI decomposition, but its value is asserted without calibration.
+    This function reports VOI results across a range of inflation factors.
+
+    Returns dict with per-factor results and a summary of how the prioritization
+    percentage varies.
+    """
+    if factors is None:
+        factors = [1.0, 1.25, 1.5, 1.75, 2.0]
+
+    factor_results = {}
+
+    for factor in factors:
+        results = run_voi_analysis(
+            df,
+            n_simulations=n_simulations,
+            prior_noise=prior_noise,
+            uncertainty_inflation=factor,
+            seed=seed,
+        )
+
+        pct_prioritization = [r.pct_from_prioritization for r in results]
+        pct_information = [r.pct_from_information for r in results]
+        oracle_values = [r.oracle for r in results]
+        s4_values = [r.s4_benchmark for r in results]
+
+        factor_results[factor] = {
+            "results": results,
+            "mean_pct_prioritization": np.mean(pct_prioritization),
+            "mean_pct_information": np.mean(pct_information),
+            "mean_oracle": np.mean(oracle_values),
+            "mean_s4": np.mean(s4_values),
+            "mean_evpi_gap": np.mean([o - s for o, s in zip(oracle_values, s4_values)]),
+            "per_archetype": {
+                r.archetype: {
+                    "pct_prioritization": r.pct_from_prioritization,
+                    "pct_information": r.pct_from_information,
+                    "oracle": r.oracle,
+                    "evpi_gap": r.oracle - r.s4_benchmark,
+                }
+                for r in results
+            },
+        }
+
+    # Summary across factors
+    pct_range = [factor_results[f]["mean_pct_prioritization"] for f in factors]
+    summary = {
+        "factors_tested": factors,
+        "mean_pct_prioritization_range": (min(pct_range), max(pct_range)),
+        "baseline_factor": 1.5,
+        "baseline_pct": factor_results.get(1.5, {}).get("mean_pct_prioritization"),
+        "interpretation": (
+            f"Across inflation factors {min(factors):.1f}--{max(factors):.1f}, "
+            f"mean prioritization percentage ranges from "
+            f"{min(pct_range):.0f}% to {max(pct_range):.0f}%. "
+            f"The qualitative finding that prioritization accounts for the majority "
+            f"of value is {'robust' if min(pct_range) > 50 else 'sensitive'} "
+            f"to the inflation factor choice."
+        ),
+    }
+
+    return {"by_factor": factor_results, "summary": summary}
 
 
 def format_results_tables(results: List[VOIResults]) -> Tuple[str, str]:

@@ -7,6 +7,7 @@ from tsd.analysis.statistical_analysis import (
     data_quality_check,
     descriptive_statistics,
     generate_report,
+    middle_tier_pairwise_tests,
     omnibus_tests,
     pairwise_comparisons,
 )
@@ -107,6 +108,39 @@ class TestDataQualityCheck:
         assert result["n_issues"] >= 1
         types = [i["type"] for i in result["issues"]]
         assert "constant_values" in types
+
+
+class TestMiddleTierPairwiseTests:
+    def test_returns_dict(self, sample_results):
+        result = middle_tier_pairwise_tests(sample_results)
+        assert isinstance(result, dict)
+        assert "methods" in result
+        assert "summary" in result
+
+    def test_default_methods(self, sample_results):
+        result = middle_tier_pairwise_tests(sample_results)
+        assert result["methods"] == ["ctgan", "dpbn", "great"]
+
+    def test_custom_methods(self, sample_results):
+        result = middle_tier_pairwise_tests(sample_results, methods=["ctgan", "dpbn"])
+        assert result["methods"] == ["ctgan", "dpbn"]
+        assert result["n_comparisons"] == 1
+
+    def test_comparisons_per_metric(self, sample_results):
+        result = middle_tier_pairwise_tests(sample_results)
+        # 3 methods -> C(3,2) = 3 pairwise comparisons
+        for metric in ["fidelity_auc", "privacy_dcr", "utility_tstr", "fairness_gap"]:
+            assert len(result[metric]["comparisons"]) == 3
+
+    def test_bonferroni_correction(self, sample_results):
+        result = middle_tier_pairwise_tests(sample_results)
+        # 3 comparisons, alpha=0.05 -> adjusted = 0.05/3
+        assert result["adjusted_alpha"] < 0.05
+
+    def test_summary_has_interpretation(self, sample_results):
+        result = middle_tier_pairwise_tests(sample_results)
+        assert "interpretation" in result["summary"]
+        assert "any_distinguishable" in result["summary"]
 
 
 class TestGenerateReport:

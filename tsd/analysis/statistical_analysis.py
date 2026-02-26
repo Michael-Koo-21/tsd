@@ -331,6 +331,101 @@ def data_quality_check(df: pd.DataFrame) -> dict:
     return {"issues": issues, "n_issues": len(issues)}
 
 
+def middle_tier_pairwise_tests(
+    df: pd.DataFrame, methods: list[str] | None = None, alpha: float = 0.05
+) -> dict:
+    """
+    Pairwise significance tests for the middle-tier method triplet.
+
+    With n=5 replicates, the omnibus ANOVA is dominated by extreme methods
+    (Synthpop, Independent Marginals). This function tests whether CTGAN,
+    DP BN, and GReaT are statistically distinguishable from each other,
+    addressing the reviewer concern that "never optimal" claims for these
+    methods rest on point estimates with limited statistical power.
+
+    Returns dict with per-metric results including t-test, Mann-Whitney U,
+    and Cohen's d for each pair in the triplet.
+    """
+    if methods is None:
+        methods = ["ctgan", "dpbn", "great"]
+
+    metrics = ["fidelity_auc", "privacy_dcr", "utility_tstr", "fairness_gap"]
+    subset = df[df["method"].isin(methods)]
+    n_comparisons = len(list(combinations(methods, 2)))
+    adjusted_alpha = alpha / n_comparisons
+
+    results = {"methods": methods, "n_comparisons": n_comparisons, "adjusted_alpha": adjusted_alpha}
+
+    for metric in metrics:
+        comparisons = []
+        for m1, m2 in combinations(methods, 2):
+            v1 = subset[subset["method"] == m1][metric].dropna().values
+            v2 = subset[subset["method"] == m2][metric].dropna().values
+
+            if len(v1) < 2 or len(v2) < 2:
+                continue
+
+            t_stat, t_p = stats.ttest_ind(v1, v2)
+            u_stat, mw_p = stats.mannwhitneyu(v1, v2, alternative="two-sided")
+
+            pooled_std = np.sqrt(
+                ((len(v1) - 1) * v1.std(ddof=1) ** 2 + (len(v2) - 1) * v2.std(ddof=1) ** 2)
+                / (len(v1) + len(v2) - 2)
+            )
+            cohens_d = (v1.mean() - v2.mean()) / pooled_std if pooled_std > 0 else 0
+
+            abs_d = abs(cohens_d)
+            if abs_d < 0.2:
+                d_interp = "negligible"
+            elif abs_d < 0.5:
+                d_interp = "small"
+            elif abs_d < 0.8:
+                d_interp = "medium"
+            else:
+                d_interp = "large"
+
+            comparisons.append(
+                {
+                    "method_1": m1,
+                    "method_2": m2,
+                    "n1": len(v1),
+                    "n2": len(v2),
+                    "mean_1": v1.mean(),
+                    "mean_2": v2.mean(),
+                    "mean_diff": v1.mean() - v2.mean(),
+                    "t_test": {"t": t_stat, "p": t_p, "significant": t_p < adjusted_alpha},
+                    "mann_whitney": {"U": u_stat, "p": mw_p, "significant": mw_p < adjusted_alpha},
+                    "cohens_d": cohens_d,
+                    "effect_interpretation": d_interp,
+                }
+            )
+
+        n_significant_t = sum(1 for c in comparisons if c["t_test"]["significant"])
+        n_significant_mw = sum(1 for c in comparisons if c["mann_whitney"]["significant"])
+        results[metric] = {
+            "comparisons": comparisons,
+            "n_significant_t": n_significant_t,
+            "n_significant_mw": n_significant_mw,
+            "any_significant": n_significant_t > 0 or n_significant_mw > 0,
+        }
+
+    # Summary: are these methods statistically distinguishable?
+    any_distinguishable = any(results[m].get("any_significant", False) for m in metrics)
+    results["summary"] = {
+        "any_distinguishable": any_distinguishable,
+        "interpretation": (
+            "At least one pair in the middle-tier triplet is statistically distinguishable "
+            "on at least one metric."
+            if any_distinguishable
+            else "No pairwise differences in the middle-tier triplet reach statistical "
+            "significance after Bonferroni correction, consistent with limited statistical "
+            "power at n=5 replicates per method."
+        ),
+    }
+
+    return results
+
+
 def generate_report(df: pd.DataFrame) -> str:
     """
     Generate a comprehensive statistical analysis report.
@@ -437,6 +532,29 @@ def generate_report(df: pd.DataFrame) -> str:
 
     report.append("")
 
+    # Middle-tier pairwise tests
+    report.append("5b. MIDDLE-TIER PAIRWISE TESTS (CTGAN, DP BN, GReaT)")
+    report.append("-" * 40)
+    middle = middle_tier_pairwise_tests(df)
+    report.append(f"Bonferroni-corrected α = {middle['adjusted_alpha']:.4f}")
+    report.append("")
+
+    for metric in ["fidelity_auc", "privacy_dcr", "utility_tstr", "fairness_gap"]:
+        if metric not in middle:
+            continue
+        report.append(f"  {metric.upper()}:")
+        for c in middle[metric]["comparisons"]:
+            sig = "*" if c["t_test"]["significant"] else ""
+            report.append(
+                f"    {c['method_1']} vs {c['method_2']}: "
+                f"Δ={c['mean_diff']:+.4f}, d={c['cohens_d']:.3f} ({c['effect_interpretation']}), "
+                f"t-p={c['t_test']['p']:.4f}{sig}"
+            )
+        report.append("")
+
+    report.append(f"  Summary: {middle['summary']['interpretation']}")
+    report.append("")
+
     # Summary
     report.append("6. KEY FINDINGS SUMMARY")
     report.append("-" * 40)
@@ -472,6 +590,7 @@ def run_analysis(filepath: str | Path) -> tuple[str, dict]:
         "levene": levene_test(df),
         "omnibus": omnibus_tests(df),
         "pairwise": pairwise_comparisons(df),
+        "middle_tier": middle_tier_pairwise_tests(df),
         "correlations": correlation_analysis(df),
         "data_quality": data_quality_check(df),
     }
