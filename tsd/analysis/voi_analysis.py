@@ -204,9 +204,11 @@ def compute_oracle(
     Simulates performance uncertainty and computes expected value of
     always choosing the best method for each realization.
 
-    Uses fixed normalization anchors (min/max from observed means) so that
-    the value scale is consistent with S4's fixed normalization. This ensures
-    EVPI >= V(S4) by construction.
+    Uses fixed normalization anchors (min/max from observed means) so the
+    transformation is linear in θ, guaranteeing EVPI >= V(S4) by Jensen's
+    inequality. Values are NOT clamped to [0,1] — noise may push normalized
+    values beyond this range, which is correct: it reflects the possibility
+    that true performance lies outside the observed range.
     """
     rng = np.random.default_rng(seed)
 
@@ -226,7 +228,7 @@ def compute_oracle(
             noise = rng.normal(0, stds[metric].values * uncertainty_inflation)
             sampled_means[metric] = means[metric] + noise
 
-        # Normalize using FIXED anchors (not re-computed per draw)
+        # Normalize using FIXED anchors (linear in θ, preserves Jensen's)
         values = sampled_means.copy()
         for metric in sampled_means.columns:
             mn, mx = norm_min[metric], norm_max[metric]

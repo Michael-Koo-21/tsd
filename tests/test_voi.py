@@ -111,6 +111,18 @@ class TestRunVOIAnalysis:
         for r in results:
             assert r.s4_benchmark >= r.s1_random
 
+    def test_oracle_ge_s4(self, sample_results):
+        """EVPI requires Oracle >= S4 by Jensen's inequality.
+
+        With fixed-anchor normalization (linear in θ), this is guaranteed
+        mathematically. Small tolerance accounts for Monte Carlo noise.
+        """
+        results = run_voi_analysis(sample_results, n_simulations=5000, seed=42)
+        for r in results:
+            assert r.oracle >= r.s4_benchmark - 0.02, (
+                f"{r.archetype}: Oracle ({r.oracle:.4f}) < S4 ({r.s4_benchmark:.4f})"
+            )
+
     def test_voi_decomposition_sums(self, sample_results):
         results = run_voi_analysis(sample_results, n_simulations=100, seed=42)
         for r in results:

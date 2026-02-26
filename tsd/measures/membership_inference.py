@@ -19,6 +19,7 @@ import numpy as np
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score
+from sklearn.model_selection import cross_val_predict
 
 
 def membership_inference_privacy(
@@ -118,8 +119,14 @@ def membership_inference_privacy(
     # Mean membership confidence
     mean_membership_confidence = membership_probs.mean()
 
-    # AUC on real data (to assess attack quality)
-    y_real_pred_proba = attack_model.predict_proba(X_real_encoded)[:, 1]
+    # AUC on real data (to assess attack quality) — use cross-validation
+    # to avoid inflated training-set AUC that would be identical across runs
+    cv_model = LogisticRegression(max_iter=1000, random_state=random_state, solver="lbfgs")
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        y_real_pred_proba = cross_val_predict(
+            cv_model, X_real_encoded, y_real, cv=5, method="predict_proba"
+        )[:, 1]
     attack_auc = roc_auc_score(y_real, y_real_pred_proba)
 
     # Validate attack quality
