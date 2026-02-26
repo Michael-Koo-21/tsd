@@ -42,9 +42,11 @@ def descriptive_statistics(df: pd.DataFrame) -> pd.DataFrame:
 
             mean = values.mean()
             std = values.std(ddof=1)
-            se = std / np.sqrt(len(values))
-            ci_lower = mean - 1.96 * se
-            ci_upper = mean + 1.96 * se
+            n = len(values)
+            se = std / np.sqrt(n)
+            t_crit = stats.t.ppf(0.975, df=n - 1)
+            ci_lower = mean - t_crit * se
+            ci_upper = mean + t_crit * se
 
             results.append(
                 {
@@ -294,6 +296,45 @@ def correlation_analysis(df: pd.DataFrame) -> dict:
     return results
 
 
+def replicate_level_correlations(df: pd.DataFrame) -> dict:
+    """
+    Compute Spearman correlations across all individual replicates.
+
+    Unlike correlation_analysis() which uses 5 method-level means (n=5),
+    this computes correlations across all individual replicates (e.g., n=25
+    for 5 methods x 5 replicates), providing a stronger statistical basis
+    for correlation claims.
+
+    Note: replicate-level correlations capture both between-method and
+    within-method variance, making them a complementary (not replacement)
+    analysis to method-level correlations.
+    """
+    metrics = ["fidelity_auc", "privacy_dcr", "utility_tstr", "fairness_gap"]
+    n_replicates = len(df)
+
+    results = {"n_replicates": n_replicates, "spearman": {}, "pearson": {}}
+
+    for m1, m2 in combinations(metrics, 2):
+        v1 = df[m1].dropna()
+        v2 = df[m2].dropna()
+
+        # Align indices in case of differing NaN patterns
+        common_idx = v1.index.intersection(v2.index)
+        v1, v2 = v1.loc[common_idx].values, v2.loc[common_idx].values
+
+        if len(v1) < 3:
+            continue
+
+        rho, p_spearman = stats.spearmanr(v1, v2)
+        r, p_pearson = stats.pearsonr(v1, v2)
+
+        pair_key = f"{m1}_vs_{m2}"
+        results["spearman"][pair_key] = {"rho": rho, "p_value": p_spearman, "n": len(v1)}
+        results["pearson"][pair_key] = {"r": r, "p_value": p_pearson, "n": len(v1)}
+
+    return results
+
+
 def data_quality_check(df: pd.DataFrame) -> dict:
     """
     Check for data quality issues.
@@ -522,13 +563,31 @@ def generate_report(df: pd.DataFrame) -> str:
     report.append("-" * 40)
     corr = correlation_analysis(df)
 
-    report.append("Spearman correlations between method-level means:")
+    report.append("Spearman correlations between method-level means (n=5):")
     for pair, vals in corr["spearman"].items():
         interp = (
             "strong" if abs(vals["rho"]) > 0.7 else "moderate" if abs(vals["rho"]) > 0.4 else "weak"
         )
         direction = "positive" if vals["rho"] > 0 else "negative"
         report.append(f"  {pair}: ρ={vals['rho']:.3f} ({interp} {direction})")
+
+    report.append("")
+
+    # Replicate-level correlations
+    report.append("5a. REPLICATE-LEVEL CORRELATIONS (all individual replicates)")
+    report.append("-" * 40)
+    rep_corr = replicate_level_correlations(df)
+    report.append(f"Spearman correlations across {rep_corr['n_replicates']} replicates:")
+    for pair, vals in rep_corr["spearman"].items():
+        interp = (
+            "strong" if abs(vals["rho"]) > 0.7 else "moderate" if abs(vals["rho"]) > 0.4 else "weak"
+        )
+        direction = "positive" if vals["rho"] > 0 else "negative"
+        sig = "*" if vals["p_value"] < 0.05 else ""
+        report.append(
+            f"  {pair}: ρ={vals['rho']:.3f} ({interp} {direction}), "
+            f"p={vals['p_value']:.4f}{sig}, n={vals['n']}"
+        )
 
     report.append("")
 
@@ -592,6 +651,7 @@ def run_analysis(filepath: str | Path) -> tuple[str, dict]:
         "pairwise": pairwise_comparisons(df),
         "middle_tier": middle_tier_pairwise_tests(df),
         "correlations": correlation_analysis(df),
+        "replicate_correlations": replicate_level_correlations(df),
         "data_quality": data_quality_check(df),
     }
 

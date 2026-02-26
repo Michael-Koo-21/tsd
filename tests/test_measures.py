@@ -66,6 +66,41 @@ class TestTSTRUtility:
         assert result["f1_ratio"] >= 0.8
 
 
+class TestTSTRUtilityMLP:
+    def test_returns_f1_ratio(self, small_train_test, small_synthetic):
+        from tsd.measures.tstr_utility import tstr_utility_mlp
+
+        df_train, df_test = small_train_test
+        result = tstr_utility_mlp(df_train, small_synthetic, df_test, target_col="target")
+        assert "f1_ratio" in result
+        assert result["f1_ratio"] >= 0
+        assert result["evaluator"] == "mlp"
+
+    def test_perfect_copy_high_ratio(self, small_train_test):
+        from tsd.measures.tstr_utility import tstr_utility_mlp
+
+        df_train, df_test = small_train_test
+        result = tstr_utility_mlp(df_train, df_train.copy(), df_test, target_col="target")
+        assert result["f1_ratio"] >= 0.5  # MLP may differ slightly from GBT
+
+    def test_returns_all_expected_keys(self, small_train_test, small_synthetic):
+        from tsd.measures.tstr_utility import tstr_utility_mlp
+
+        df_train, df_test = small_train_test
+        result = tstr_utility_mlp(df_train, small_synthetic, df_test, target_col="target")
+        expected_keys = {
+            "f1_real",
+            "f1_synthetic",
+            "f1_ratio",
+            "auc_real",
+            "auc_synthetic",
+            "auc_ratio",
+            "utility_score",
+            "evaluator",
+        }
+        assert set(result.keys()) == expected_keys
+
+
 class TestFairnessGap:
     def test_returns_max_gap(self, small_train_test, small_synthetic):
         from tsd.measures.fairness_gap import fairness_gap

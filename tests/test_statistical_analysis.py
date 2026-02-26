@@ -1,6 +1,8 @@
 """Tests for tsd.analysis.statistical_analysis."""
 
+import numpy as np
 import pandas as pd
+from scipy import stats as scipy_stats
 
 from tsd.analysis.statistical_analysis import (
     correlation_analysis,
@@ -10,6 +12,7 @@ from tsd.analysis.statistical_analysis import (
     middle_tier_pairwise_tests,
     omnibus_tests,
     pairwise_comparisons,
+    replicate_level_correlations,
 )
 
 
@@ -143,6 +146,61 @@ class TestMiddleTierPairwiseTests:
         assert "any_distinguishable" in result["summary"]
 
 
+class TestDescriptiveStatisticsTDistribution:
+    """Verify the CI uses t-distribution, not z=1.96."""
+
+    def test_ci_uses_t_distribution(self, sample_results):
+        result = descriptive_statistics(sample_results)
+        # Pick one row to verify
+        row = result.iloc[0]
+        n = int(row["n"])
+        mean = row["mean"]
+        std = row["std"]
+        se = std / np.sqrt(n)
+        t_crit = scipy_stats.t.ppf(0.975, df=n - 1)
+        expected_lower = mean - t_crit * se
+        expected_upper = mean + t_crit * se
+        assert row["ci_lower"] == expected_lower
+        assert row["ci_upper"] == expected_upper
+
+    def test_ci_wider_than_z_based(self, sample_results):
+        result = descriptive_statistics(sample_results)
+        for _, row in result.iterrows():
+            n = int(row["n"])
+            se = row["std"] / np.sqrt(n)
+            z_width = 2 * 1.96 * se
+            actual_width = row["ci_upper"] - row["ci_lower"]
+            # t-based CI should be wider than z-based for small n
+            if se > 0:
+                assert actual_width > z_width
+
+
+class TestReplicateLevelCorrelations:
+    def test_returns_dict(self, sample_results):
+        result = replicate_level_correlations(sample_results)
+        assert isinstance(result, dict)
+        assert "spearman" in result
+        assert "pearson" in result
+        assert "n_replicates" in result
+
+    def test_n_replicates_matches(self, sample_results):
+        result = replicate_level_correlations(sample_results)
+        assert result["n_replicates"] == len(sample_results)
+
+    def test_correlation_range(self, sample_results):
+        result = replicate_level_correlations(sample_results)
+        for pair, vals in result["spearman"].items():
+            assert -1 <= vals["rho"] <= 1
+            assert vals["p_value"] >= 0
+            assert vals["n"] > 0
+
+    def test_more_observations_than_method_means(self, sample_results):
+        result = replicate_level_correlations(sample_results)
+        for pair, vals in result["spearman"].items():
+            # 5 methods x 3 replicates = 15 > 5 method means
+            assert vals["n"] == 15
+
+
 class TestGenerateReport:
     def test_returns_string(self, sample_results):
         report = generate_report(sample_results)
@@ -155,6 +213,7 @@ class TestGenerateReport:
         assert "OMNIBUS TESTS" in report
         assert "PAIRWISE COMPARISONS" in report
         assert "METRIC CORRELATIONS" in report
+        assert "REPLICATE-LEVEL CORRELATIONS" in report
         assert "KEY FINDINGS" in report
 
     def test_contains_method_count(self, sample_results):

@@ -30,6 +30,7 @@ import pandas as pd
 from sklearn.compose import ColumnTransformer
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.metrics import f1_score, roc_auc_score
+from sklearn.neural_network import MLPClassifier
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
 
@@ -156,6 +157,122 @@ def tstr_utility(
         "auc_synthetic": auc_synthetic,
         "auc_ratio": auc_ratio,
         "utility_score": utility_score,
+    }
+
+
+def tstr_utility_mlp(
+    df_real_train: pd.DataFrame,
+    df_synthetic: pd.DataFrame,
+    df_real_test: pd.DataFrame,
+    target_col: str,
+    hidden_layer_sizes: tuple = (100, 50),
+    max_iter: int = 500,
+    random_state: int = 42,
+) -> dict:
+    """
+    Compute TSTR utility using an MLP classifier (non-tree robustness check).
+
+    Provides a non-tree-based evaluation to bound the evaluator alignment
+    bias that may favor tree-based generators (e.g., Synthpop's CART)
+    when evaluated by tree-based classifiers.
+
+    Args:
+        df_real_train: Real training data
+        df_synthetic: Synthetic data
+        df_real_test: Real test data (for evaluation)
+        target_col: Name of target variable
+        hidden_layer_sizes: MLP architecture (default: two layers, 100 and 50 units)
+        max_iter: Maximum training iterations (default: 500)
+        random_state: Random seed for reproducibility
+
+    Returns:
+        Dictionary with same structure as tstr_utility(), plus evaluator field.
+    """
+    X_real_train = df_real_train.drop(target_col, axis=1)
+    y_real_train = df_real_train[target_col]
+
+    X_synthetic = df_synthetic.drop(target_col, axis=1)
+    y_synthetic = df_synthetic[target_col]
+
+    X_test = df_real_test.drop(target_col, axis=1)
+    y_test = df_real_test[target_col]
+
+    categorical_cols = X_real_train.select_dtypes(include=["object", "category"]).columns.tolist()
+    continuous_cols = X_real_train.select_dtypes(exclude=["object", "category"]).columns.tolist()
+
+    if len(categorical_cols) > 0 and len(continuous_cols) > 0:
+        preprocessor = ColumnTransformer(
+            transformers=[
+                (
+                    "cat",
+                    OneHotEncoder(handle_unknown="ignore", sparse_output=False),
+                    categorical_cols,
+                ),
+                ("num", StandardScaler(), continuous_cols),
+            ]
+        )
+    elif len(categorical_cols) > 0:
+        preprocessor = ColumnTransformer(
+            transformers=[
+                (
+                    "cat",
+                    OneHotEncoder(handle_unknown="ignore", sparse_output=False),
+                    categorical_cols,
+                )
+            ]
+        )
+    else:
+        preprocessor = ColumnTransformer(transformers=[("num", StandardScaler(), continuous_cols)])
+
+    X_real_train_enc = preprocessor.fit_transform(X_real_train)
+    X_synthetic_enc = preprocessor.transform(X_synthetic)
+    X_test_enc = preprocessor.transform(X_test)
+
+    # Train MLP on REAL data (gold standard)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        clf_real = MLPClassifier(
+            hidden_layer_sizes=hidden_layer_sizes,
+            max_iter=max_iter,
+            random_state=random_state,
+        )
+        clf_real.fit(X_real_train_enc, y_real_train)
+
+    y_pred_real = clf_real.predict(X_test_enc)
+    y_pred_proba_real = clf_real.predict_proba(X_test_enc)[:, 1]
+
+    f1_real = f1_score(y_test, y_pred_real)
+    auc_real = roc_auc_score(y_test, y_pred_proba_real)
+
+    # Train MLP on SYNTHETIC data
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        clf_synthetic = MLPClassifier(
+            hidden_layer_sizes=hidden_layer_sizes,
+            max_iter=max_iter,
+            random_state=random_state,
+        )
+        clf_synthetic.fit(X_synthetic_enc, y_synthetic)
+
+    y_pred_synthetic = clf_synthetic.predict(X_test_enc)
+    y_pred_proba_synthetic = clf_synthetic.predict_proba(X_test_enc)[:, 1]
+
+    f1_synthetic = f1_score(y_test, y_pred_synthetic)
+    auc_synthetic = roc_auc_score(y_test, y_pred_proba_synthetic)
+
+    f1_ratio = f1_synthetic / f1_real if f1_real > 0 else 0.0
+    auc_ratio = auc_synthetic / auc_real if auc_real > 0 else 0.0
+    utility_score = min(1.0, f1_ratio)
+
+    return {
+        "f1_real": f1_real,
+        "f1_synthetic": f1_synthetic,
+        "f1_ratio": f1_ratio,
+        "auc_real": auc_real,
+        "auc_synthetic": auc_synthetic,
+        "auc_ratio": auc_ratio,
+        "utility_score": utility_score,
+        "evaluator": "mlp",
     }
 
 
