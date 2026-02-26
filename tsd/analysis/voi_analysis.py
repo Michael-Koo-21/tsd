@@ -111,7 +111,7 @@ def compute_method_value(values: pd.DataFrame, weights: Dict[str, float]) -> pd.
     efficiency_values = {
         "independent_marginals": 1.0,  # <1 min
         "synthpop": 1.0,  # <1 min
-        "ctgan": 0.95,  # ~1 min
+        "ctgan": 0.90,  # ~1 min
         "dpbn": 1.0,  # <1 min
         "great": 0.24,  # ~90 min (worst)
     }
@@ -162,7 +162,8 @@ def strategy_s3_rough_estimates(
     """
     S3: Rough estimates with prior uncertainty.
 
-    Models practitioner prior beliefs as noisy estimates of true performance.
+    Models practitioner prior beliefs as noisy estimates of true method value.
+    Default prior_noise=0.15 represents moderate but imperfect prior knowledge.
     """
     rng = np.random.default_rng(seed)
 

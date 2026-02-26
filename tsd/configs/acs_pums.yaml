@@ -16,6 +16,6 @@ continuous_columns:
   - "PINCP"
 weight_column: "PWGTP"
 train_fraction: 0.7
-sample_size: 50000
+sample_size: 35000
 random_state: 42
 preprocessing: "acs_pums"

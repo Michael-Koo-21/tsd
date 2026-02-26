@@ -51,8 +51,15 @@ def v_efficiency(x):
     return max(0, min(1, v))
 
 
-def load_and_compute_values(filepath):
-    """Load results and compute value scores using paper's value functions."""
+def load_and_compute_values(filepath, normalization="reference"):
+    """Load results and compute value scores.
+
+    Args:
+        filepath: Path to all_results.csv
+        normalization: "reference" for reference-anchored value functions
+            (used in decision-focused analysis), or "minmax" for pure
+            min-max normalization (used in VOI analysis and Table 5).
+    """
     df = pd.read_csv(filepath)
 
     summary = df.groupby("method").agg(
@@ -64,6 +71,9 @@ def load_and_compute_values(filepath):
         }
     )
 
+    if normalization == "minmax":
+        return _compute_minmax_values(summary)
+
     value_scores = {}
     for method in summary.index:
         efficiency = DEFAULT_RUNTIME_MINUTES.get(method, 1.0)
@@ -74,6 +84,48 @@ def load_and_compute_values(filepath):
             "fairness": v_fairness(summary.loc[method, "fairness_gap"]),
             "efficiency": v_efficiency(efficiency),
         }
+
+    return value_scores
+
+
+# Direction: True = higher is better, False = lower is better
+_METRIC_DIRECTION = {
+    "fidelity_auc": False,
+    "privacy_dcr": True,
+    "utility_tstr": True,
+    "fairness_gap": False,
+}
+
+_METRIC_TO_OBJ = {
+    "fidelity_auc": "fidelity",
+    "privacy_dcr": "privacy",
+    "utility_tstr": "utility",
+    "fairness_gap": "fairness",
+}
+
+
+def _compute_minmax_values(summary):
+    """Min-max normalization matching VOI analysis and paper Table 5."""
+    value_scores = {}
+
+    for method in summary.index:
+        value_scores[method] = {}
+
+    for metric, obj in _METRIC_TO_OBJ.items():
+        col = summary[metric]
+        min_val, max_val = col.min(), col.max()
+        for method in summary.index:
+            if max_val > min_val:
+                v = (col[method] - min_val) / (max_val - min_val)
+            else:
+                v = 0.5
+            if not _METRIC_DIRECTION[metric]:
+                v = 1 - v
+            value_scores[method][obj] = v
+
+    for method in summary.index:
+        efficiency = DEFAULT_RUNTIME_MINUTES.get(method, 1.0)
+        value_scores[method]["efficiency"] = v_efficiency(efficiency)
 
     return value_scores
 
@@ -238,9 +290,10 @@ def regenerate_paper_figures(results_path: str | Path, output_dir: str | Path):
     output_dir.mkdir(parents=True, exist_ok=True)
 
     df = pd.read_csv(results_path)
-    value_scores = load_and_compute_values(results_path)
+    # Profile comparison uses min-max normalization to match paper Table 5
+    value_scores_minmax = load_and_compute_values(results_path, normalization="minmax")
 
-    generate_mada_profile_comparison(value_scores, output_dir)
+    generate_mada_profile_comparison(value_scores_minmax, output_dir)
     generate_pareto_frontier(df, output_dir)
 
     # Also generate all standard visualizations
