@@ -43,6 +43,7 @@ class VOIResults:
     archetype: str
     s1_random: float
     s2_heuristic: float
+    s2_informed: float
     s3_rough: float
     s4_benchmark: float
     oracle: float
@@ -131,19 +132,34 @@ def strategy_s1_random(method_values: pd.Series) -> float:
     return method_values.mean()
 
 
-def strategy_s2_heuristic(method_values: pd.Series, archetype: str) -> float:
+def strategy_s2_heuristic(
+    method_values: pd.Series, archetype: str, informed: bool = False
+) -> float:
     """
     S2: Simple heuristic based on archetype.
 
-    Privacy-first: Choose DP BN
-    Utility-first: Choose CTGAN (common practitioner belief)
-    Balanced: Choose GReaT
+    Default (informed=False):
+        Privacy-first: Choose DP BN
+        Utility-first: Choose CTGAN (common practitioner belief)
+        Balanced: Choose GReaT
+
+    Informed variant (informed=True):
+        Privacy-first: Choose DP BN
+        Utility-first: Choose Synthpop
+        Balanced: Choose Synthpop
     """
-    heuristic_choice = {
-        "privacy_first": "dpbn",
-        "utility_first": "ctgan",  # Common but potentially suboptimal
-        "balanced": "great",
-    }
+    if informed:
+        heuristic_choice = {
+            "privacy_first": "dpbn",
+            "utility_first": "synthpop",
+            "balanced": "synthpop",
+        }
+    else:
+        heuristic_choice = {
+            "privacy_first": "dpbn",
+            "utility_first": "ctgan",  # Common but potentially suboptimal
+            "balanced": "great",
+        }
 
     choice = heuristic_choice.get(archetype, "synthpop")
     if choice in method_values.index:
@@ -273,6 +289,7 @@ def run_voi_analysis(
         # Compute each strategy's expected value
         s1 = strategy_s1_random(method_values)
         s2 = strategy_s2_heuristic(method_values, arch_id)
+        s2_informed = strategy_s2_heuristic(method_values, arch_id, informed=True)
         s3 = strategy_s3_rough_estimates(
             method_values, stds, weights, n_simulations, prior_noise, seed
         )
@@ -297,6 +314,7 @@ def run_voi_analysis(
                 archetype=arch_config["name"],
                 s1_random=s1,
                 s2_heuristic=s2,
+                s2_informed=s2_informed,
                 s3_rough=s3,
                 s4_benchmark=s4,
                 oracle=oracle,
@@ -327,6 +345,7 @@ def format_results_tables(results: List[VOIResults]) -> Tuple[str, str]:
     # Compute means
     s1_mean = np.mean([r.s1_random for r in results])
     s2_mean = np.mean([r.s2_heuristic for r in results])
+    s2_inf_mean = np.mean([r.s2_informed for r in results])
     s3_mean = np.mean([r.s3_rough for r in results])
     s4_mean = np.mean([r.s4_benchmark for r in results])
     oracle_mean = np.mean([r.oracle for r in results])
@@ -336,6 +355,9 @@ def format_results_tables(results: List[VOIResults]) -> Tuple[str, str]:
     )
     strategy_rows.append(
         f"S2 (Heuristic) & {results[0].s2_heuristic:.2f} & {results[1].s2_heuristic:.2f} & {results[2].s2_heuristic:.2f} & {s2_mean:.2f} \\\\"
+    )
+    strategy_rows.append(
+        f"S2' (Informed Heuristic) & {results[0].s2_informed:.2f} & {results[1].s2_informed:.2f} & {results[2].s2_informed:.2f} & {s2_inf_mean:.2f} \\\\"
     )
     strategy_rows.append(
         f"S3 (Rough Estimates) & {results[0].s3_rough:.2f} & {results[1].s3_rough:.2f} & {results[2].s3_rough:.2f} & {s3_mean:.2f} \\\\"
@@ -401,6 +423,7 @@ def print_report(results: List[VOIResults]) -> None:
 
     s1_vals = [r.s1_random for r in results]
     s2_vals = [r.s2_heuristic for r in results]
+    s2_inf_vals = [r.s2_informed for r in results]
     s3_vals = [r.s3_rough for r in results]
     s4_vals = [r.s4_benchmark for r in results]
     oracle_vals = [r.oracle for r in results]
@@ -410,6 +433,9 @@ def print_report(results: List[VOIResults]) -> None:
     )
     print(
         f"{'S2 (Heuristic)':<25} {s2_vals[0]:>12.2f} {s2_vals[1]:>14.2f} {s2_vals[2]:>10.2f} {np.mean(s2_vals):>8.2f}"
+    )
+    print(
+        f"{'S2 (Informed)':<25} {s2_inf_vals[0]:>12.2f} {s2_inf_vals[1]:>14.2f} {s2_inf_vals[2]:>10.2f} {np.mean(s2_inf_vals):>8.2f}"
     )
     print(
         f"{'S3 (Rough Estimates)':<25} {s3_vals[0]:>12.2f} {s3_vals[1]:>14.2f} {s3_vals[2]:>10.2f} {np.mean(s3_vals):>8.2f}"
