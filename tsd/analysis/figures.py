@@ -277,6 +277,214 @@ def generate_pareto_frontier(df, output_dir):
     return fig_path
 
 
+def correlation_adjusted_analysis(value_scores):
+    """Run MADA with fidelity and privacy collapsed into a single dimension.
+
+    Merges fidelity and privacy into 'data_similarity' (simple average of the
+    two value scores) and remaps archetype weights accordingly, normalizing
+    to sum to 1.0. Reports whether the Synthpop vs DP-BN recommendation and
+    the 0.40 privacy threshold survive dimension reduction.
+
+    Args:
+        value_scores: Dict of {method: {objective: value}} from load_and_compute_values.
+
+    Returns:
+        Dict with collapsed value scores, remapped archetype results, and
+        breakeven analysis.
+    """
+    methods = list(value_scores.keys())
+
+    # Collapse fidelity + privacy into data_similarity (average)
+    collapsed_scores = {}
+    for method in methods:
+        vs = value_scores[method]
+        collapsed_scores[method] = {
+            "data_similarity": (vs["fidelity"] + vs["privacy"]) / 2.0,
+            "utility": vs["utility"],
+            "fairness": vs["fairness"],
+            "efficiency": vs["efficiency"],
+        }
+
+    # Remap archetype weights: merge fidelity + privacy weights into data_similarity
+    results = {}
+    for arch_id, arch in ARCHETYPES.items():
+        w = arch["weights"]
+        collapsed_w = {
+            "data_similarity": w["fidelity"] + w["privacy"],
+            "utility": w["utility"],
+            "fairness": w["fairness"],
+            "efficiency": w["efficiency"],
+        }
+
+        # Compute weighted scores
+        method_vals = {}
+        for method in methods:
+            cs = collapsed_scores[method]
+            method_vals[method] = sum(collapsed_w[k] * cs[k] for k in collapsed_w)
+
+        ranking = sorted(method_vals.items(), key=lambda x: x[1], reverse=True)
+
+        results[arch_id] = {
+            "name": arch["name"],
+            "collapsed_weights": collapsed_w,
+            "method_values": method_vals,
+            "ranking": ranking,
+            "top_method": ranking[0][0],
+            "top_score": ranking[0][1],
+        }
+
+    # Breakeven analysis: find privacy threshold where DP-BN overtakes Synthpop
+    # Vary data_similarity weight from 0.05 to 0.80 (representing combined fidelity+privacy)
+    import numpy as np
+
+    breakeven_threshold = None
+    balanced_w = ARCHETYPES["balanced"]["weights"]
+    other_objs = ["utility", "fairness", "efficiency"]
+    other_total = sum(balanced_w[o] for o in other_objs)
+
+    for ds_w in np.arange(0.05, 0.85, 0.01):
+        remaining = 1.0 - ds_w
+        weights = {"data_similarity": ds_w}
+        for o in other_objs:
+            weights[o] = balanced_w[o] / other_total * remaining
+
+        method_vals = {}
+        for method in methods:
+            cs = collapsed_scores[method]
+            method_vals[method] = sum(weights[k] * cs[k] for k in weights)
+
+        top = max(method_vals, key=method_vals.get)
+        if top == "dpbn" and breakeven_threshold is None:
+            breakeven_threshold = ds_w
+
+    return {
+        "collapsed_scores": collapsed_scores,
+        "archetype_results": results,
+        "breakeven_data_similarity_weight": breakeven_threshold,
+        "original_breakeven_privacy_weight": 0.40,
+    }
+
+
+def generate_tornado_sensitivity(value_scores, output_dir, baseline_weights=None):
+    """Generate a one-way sensitivity tornado plot (Balanced Baseline).
+
+    For each objective, varies its weight from 0.05 to 0.50 with proportional
+    rescaling of remaining weights, and records the range of the top achievable
+    value. Bars are sorted by impact magnitude (widest at top).
+
+    Args:
+        value_scores: Dict of {method: {objective: value}} from load_and_compute_values.
+        output_dir: Directory to write the figure.
+        baseline_weights: Baseline weight dict. Defaults to Balanced archetype.
+    """
+    import matplotlib.pyplot as plt
+
+    if baseline_weights is None:
+        baseline_weights = ARCHETYPES["balanced"]["weights"]
+
+    objectives = list(baseline_weights.keys())
+    methods = list(value_scores.keys())
+
+    weight_lo, weight_hi = 0.05, 0.50
+
+    # For each objective, compute the top method value at lo and hi weights
+    results = []
+    for obj in objectives:
+        other_objs = [o for o in objectives if o != obj]
+        other_total = sum(baseline_weights[o] for o in other_objs)
+
+        values_at = {}
+        for w in [weight_lo, weight_hi]:
+            remaining = 1.0 - w
+            weights = {obj: w}
+            for o in other_objs:
+                if other_total > 0:
+                    weights[o] = baseline_weights[o] / other_total * remaining
+                else:
+                    weights[o] = remaining / len(other_objs)
+            # Compute best method value at this weight
+            method_vals = {
+                m: calculate_weighted_score(value_scores, m, weights) for m in methods
+            }
+            values_at[w] = max(method_vals.values())
+
+        lo_val = values_at[weight_lo]
+        hi_val = values_at[weight_hi]
+        results.append({
+            "objective": obj,
+            "lo": min(lo_val, hi_val),
+            "hi": max(lo_val, hi_val),
+            "range": abs(hi_val - lo_val),
+        })
+
+    # Sort by range (widest at top)
+    results.sort(key=lambda r: r["range"])
+
+    plt.style.use("seaborn-v0_8-whitegrid")
+    fig, ax = plt.subplots(figsize=(10, 5))
+
+    y_positions = range(len(results))
+    # Compute baseline value for the center line
+    baseline_val = max(
+        calculate_weighted_score(value_scores, m, baseline_weights) for m in methods
+    )
+
+    obj_labels = {
+        "fidelity": "Fidelity",
+        "privacy": "Privacy",
+        "utility": "Utility",
+        "fairness": "Fairness",
+        "efficiency": "Efficiency",
+    }
+    obj_colors = {
+        "fidelity": "#4C72B0",
+        "privacy": "#55A868",
+        "utility": "#C44E52",
+        "fairness": "#8172B3",
+        "efficiency": "#CCB974",
+    }
+
+    for i, r in enumerate(results):
+        obj = r["objective"]
+        ax.barh(
+            i,
+            r["hi"] - r["lo"],
+            left=r["lo"],
+            height=0.6,
+            color=obj_colors.get(obj, "#999999"),
+            edgecolor="black",
+            linewidth=0.5,
+        )
+        # Annotate range
+        ax.text(
+            r["hi"] + 0.005, i, f"\u0394={r['range']:.3f}",
+            va="center", fontsize=9,
+        )
+
+    ax.set_yticks(list(y_positions))
+    ax.set_yticklabels([obj_labels.get(r["objective"], r["objective"]) for r in results])
+    ax.axvline(x=baseline_val, color="black", linestyle="--", linewidth=1, alpha=0.7)
+    ax.set_xlabel("Top Achievable Value")
+    ax.set_title(
+        "One-Way Sensitivity Tornado Plot (Balanced Baseline)\n"
+        "Weight varied from 0.05 to 0.50; remaining weights rescaled proportionally",
+        fontsize=11,
+        fontweight="bold",
+    )
+    ax.set_xlim(
+        min(r["lo"] for r in results) - 0.02,
+        max(r["hi"] for r in results) + 0.04,
+    )
+
+    plt.tight_layout()
+    fig_path = Path(output_dir) / "tornado_sensitivity.png"
+    plt.savefig(fig_path, dpi=150, bbox_inches="tight", facecolor="white")
+    plt.close()
+
+    print(f"Saved: {fig_path}")
+    return fig_path
+
+
 def regenerate_paper_figures(results_path: str | Path, output_dir: str | Path):
     """
     Regenerate all paper figures.
@@ -294,6 +502,7 @@ def regenerate_paper_figures(results_path: str | Path, output_dir: str | Path):
     value_scores_minmax = load_and_compute_values(results_path, normalization="minmax")
 
     generate_mada_profile_comparison(value_scores_minmax, output_dir)
+    generate_tornado_sensitivity(value_scores_minmax, output_dir)
     generate_pareto_frontier(df, output_dir)
 
     # Also generate all standard visualizations

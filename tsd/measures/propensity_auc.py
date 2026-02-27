@@ -137,6 +137,103 @@ def propensity_auc(
     }
 
 
+def propensity_auc_robustness(
+    df_real: pd.DataFrame,
+    df_synthetic: pd.DataFrame,
+    n_splits: int = 3,
+    random_state: int = 42,
+) -> dict:
+    """
+    Compute propensity AUC using non-tree classifiers for evaluator alignment check.
+
+    Tests whether Synthpop's fidelity advantage persists when using logistic regression
+    and MLP classifiers instead of GBT, addressing the concern that tree-based evaluators
+    may systematically favor tree-generated (Synthpop/CART) data.
+
+    Args:
+        df_real: Real data
+        df_synthetic: Synthetic data
+        n_splits: Number of cross-validation folds
+        random_state: Random seed
+
+    Returns:
+        Dictionary with AUC scores for each classifier type:
+            - gbt_auc: GBT (baseline, for comparison)
+            - lr_auc: Logistic Regression
+            - mlp_auc: MLP Neural Network
+    """
+    from sklearn.linear_model import LogisticRegression
+    from sklearn.neural_network import MLPClassifier
+    from sklearn.preprocessing import StandardScaler
+
+    # Combine data and create labels
+    df_real_labeled = df_real.copy()
+    df_real_labeled["is_synthetic"] = 0
+    df_synthetic_labeled = df_synthetic.copy()
+    df_synthetic_labeled["is_synthetic"] = 1
+    df_combined = pd.concat([df_real_labeled, df_synthetic_labeled], ignore_index=True)
+
+    X = df_combined.drop("is_synthetic", axis=1)
+    y = df_combined["is_synthetic"]
+
+    # Encode categorical features
+    X_encoded = pd.DataFrame()
+    for col in X.columns:
+        if X[col].dtype in ["object", "category"]:
+            dummies = pd.get_dummies(X[col], prefix=col, drop_first=True)
+            X_encoded = pd.concat([X_encoded, dummies], axis=1)
+        else:
+            X_encoded[col] = X[col]
+    X_encoded = X_encoded.fillna(X_encoded.median())
+
+    X_array = X_encoded.to_numpy()
+    y_array = y.to_numpy()
+
+    # Scale for LR and MLP (tree methods don't need scaling)
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X_array)
+
+    kf = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=random_state)
+
+    classifiers = {
+        "gbt": (
+            lambda: GradientBoostingClassifier(
+                n_estimators=100, max_depth=3, random_state=random_state
+            ),
+            X_array,
+        ),
+        "lr": (
+            lambda: LogisticRegression(
+                max_iter=1000, random_state=random_state
+            ),
+            X_scaled,
+        ),
+        "mlp": (
+            lambda: MLPClassifier(
+                hidden_layer_sizes=(64, 32),
+                max_iter=500,
+                random_state=random_state,
+            ),
+            X_scaled,
+        ),
+    }
+
+    results = {}
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        for name, (clf_factory, X_data) in classifiers.items():
+            fold_aucs = []
+            for train_idx, test_idx in kf.split(X_data, y_array):
+                clf = clf_factory()
+                clf.fit(X_data[train_idx], y_array[train_idx])
+                y_pred = clf.predict_proba(X_data[test_idx])[:, 1]
+                fold_aucs.append(roc_auc_score(y_array[test_idx], y_pred))
+            results[f"{name}_auc"] = np.mean(fold_aucs)
+            results[f"{name}_fold_aucs"] = fold_aucs
+
+    return results
+
+
 def propensity_auc_no_cv(
     df_real: pd.DataFrame,
     df_synthetic: pd.DataFrame,
