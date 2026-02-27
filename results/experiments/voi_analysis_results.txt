@@ -7,20 +7,21 @@ STRATEGY OUTCOMES (Expected Value)
 ----------------------------------------------------------------------
 Strategy                  Privacy-First  Utility-First   Balanced     Mean
 ----------------------------------------------------------------------
-S1 (Random)                       0.51           0.57       0.54     0.54
-S2 (Heuristic)                    0.59           0.62       0.43     0.55
-S3 (Rough Estimates)              0.54           0.85       0.68     0.69
-S4 (Full Benchmark)               0.59           0.90       0.75     0.75
+S1 (Random)                      0.511          0.570      0.539    0.540
+S2 (Heuristic)                   0.587          0.618      0.435    0.546
+S2 (Informed)                    0.587          0.900      0.750    0.746
+S3 (Rough Estimates)             0.541          0.850      0.685    0.692
+S4 (Full Benchmark)              0.587          0.900      0.750    0.746
 ----------------------------------------------------------------------
-Oracle (EVPI bound)               0.61           0.88       0.73     0.74
+Oracle (EVPI bound)              0.624          0.900      0.761    0.762
 
 VOI DECOMPOSITION
 ----------------------------------------------------------------------
 Component                           Privacy-First  Utility-First   Balanced     Mean
 ----------------------------------------------------------------------
-Value of Prioritization                     0.03           0.28       0.15     0.15
-Value of Information                        0.05           0.05       0.07     0.05
-Total Improvement                           0.08           0.33       0.21     0.21
+Value of Prioritization                    0.031          0.280      0.146    0.152
+Value of Information                       0.045          0.050      0.065    0.053
+Total Improvement                          0.076          0.330      0.211    0.206
 ----------------------------------------------------------------------
 % from Prioritization                        40%            85%        69%      65%
 % from Information                           60%            15%        31%      35%
@@ -31,14 +32,14 @@ KEY FINDINGS
    (Keisler 2004 found ~71% in portfolio decision analysis)
 
 2. VOI varies by archetype:
-   - Privacy-First Practitioner: VOI = 0.05
-   - Utility-First Practitioner: VOI = 0.05
-   - Balanced Practitioner: VOI = 0.07
+   - Privacy-First Practitioner: VOI = 0.045
+   - Utility-First Practitioner: VOI = 0.050
+   - Balanced Practitioner: VOI = 0.065
 
 3. Heuristics perform well when priorities are clear:
-   - Privacy-First Practitioner: S2 vs S4 gap = 0.00
-   - Utility-First Practitioner: S2 vs S4 gap = 0.28
-   - Balanced Practitioner: S2 vs S4 gap = 0.32
+   - Privacy-First Practitioner: S2 vs S4 gap = 0.000
+   - Utility-First Practitioner: S2 vs S4 gap = 0.282
+   - Balanced Practitioner: S2 vs S4 gap = 0.315
 
 ======================================================================
 
@@ -48,19 +49,20 @@ LATEX TABLES FOR PAPER
 Strategy Table:
 Strategy & Privacy-First & Utility-First & Balanced & Mean \\
 \midrule
-S1 (Random) & 0.51 & 0.57 & 0.54 & 0.54 \\
-S2 (Heuristic) & 0.59 & 0.62 & 0.43 & 0.55 \\
-S3 (Rough Estimates) & 0.54 & 0.85 & 0.68 & 0.69 \\
-S4 (Full Benchmark) & 0.59 & 0.90 & 0.75 & 0.75 \\
+S1 (Random) & 0.511 & 0.570 & 0.539 & 0.540 \\
+S2 (Heuristic) & 0.587 & 0.618 & 0.435 & 0.546 \\
+S2' (Informed Heuristic) & 0.587 & 0.900 & 0.750 & 0.746 \\
+S3 (Rough Estimates) & 0.541 & 0.850 & 0.685 & 0.692 \\
+S4 (Full Benchmark) & 0.587 & 0.900 & 0.750 & 0.746 \\
 \midrule
-Oracle (EVPI bound) & 0.61 & 0.88 & 0.73 & 0.74 \\
+Oracle (EVPI bound) & 0.624 & 0.900 & 0.761 & 0.762 \\
 
 VOI Table:
 Component & Privacy-First & Utility-First & Balanced & Mean \\
 \midrule
-Value of Prioritization $V(\text{S3})-V(\text{S1})$ & 0.03 & 0.28 & 0.15 & 0.15 \\
-Value of Information $V(\text{S4})-V(\text{S3})$ & 0.05 & 0.05 & 0.07 & 0.05 \\
-Total Improvement $V(\text{S4})-V(\text{S1})$ & 0.08 & 0.33 & 0.21 & 0.21 \\
+Value of Prioritization $V(\text{S3})-V(\text{S1})$ & 0.031 & 0.280 & 0.146 & 0.152 \\
+Value of Information $V(\text{S4})-V(\text{S3})$ & 0.045 & 0.050 & 0.065 & 0.053 \\
+Total Improvement $V(\text{S4})-V(\text{S1})$ & 0.076 & 0.330 & 0.211 & 0.206 \\
 \midrule
 \% from Prioritization & 40\% & 85\% & 69\% & \textbf{65\%} \\
 \% from Information & 60\% & 15\% & 31\% & 35\% \\

@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from tsd.constants import ARCHETYPES, CORE_METRICS
+from tsd.constants import ARCHETYPES, CORE_METRICS, NORMALIZED_EFFICIENCY
 
 
 def verify_claims(results_path: str | Path) -> str:
@@ -80,16 +80,9 @@ def verify_claims(results_path: str | Path) -> str:
     p("\n4. WEIGHTED SCORES VERIFICATION (Table 4):")
     p("-" * 70)
 
-    # Add efficiency estimates for weighted scoring
-    efficiency = {
-        "independent_marginals": 1.0,
-        "synthpop": 1.0,
-        "ctgan": 0.90,
-        "dpbn": 1.0,
-        "great": 0.24,
-    }
+    # Add efficiency estimates for weighted scoring (from constants.py single source of truth)
     norm_with_eff = normalized.copy()
-    norm_with_eff["efficiency"] = pd.Series(efficiency)
+    norm_with_eff["efficiency"] = pd.Series(NORMALIZED_EFFICIENCY)
 
     metric_map_with_eff = {
         "fidelity_auc": "fidelity",

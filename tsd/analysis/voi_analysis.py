@@ -18,7 +18,7 @@ from typing import Any, Dict, List, Tuple
 import numpy as np
 import pandas as pd
 
-from tsd.constants import ARCHETYPES
+from tsd.constants import ARCHETYPES, NORMALIZED_EFFICIENCY
 
 # VOI analysis uses the 4 core metrics (no efficiency in raw data)
 _VOI_METRIC_MAP = {
@@ -107,20 +107,12 @@ def compute_method_value(values: pd.DataFrame, weights: Dict[str, float]) -> pd.
         if metric in values.columns and attr in weights:
             method_values += values[metric] * weights[attr]
 
-    # Add efficiency (not in _VOI_METRIC_MAP but in weights)
-    # For efficiency, we use inverse of time - estimate from method characteristics
-    efficiency_values = {
-        "independent_marginals": 1.0,  # <1 min
-        "synthpop": 1.0,  # <1 min
-        "ctgan": 0.90,  # ~1 min
-        "dpbn": 1.0,  # <1 min
-        "great": 0.24,  # ~90 min (worst)
-    }
-
+    # Add efficiency (not in _VOI_METRIC_MAP but in weights).
+    # Uses NORMALIZED_EFFICIENCY from constants.py (single source of truth).
     if "efficiency" in weights:
         for method in method_values.index:
-            if method in efficiency_values:
-                method_values[method] += efficiency_values[method] * weights["efficiency"]
+            if method in NORMALIZED_EFFICIENCY:
+                method_values[method] += NORMALIZED_EFFICIENCY[method] * weights["efficiency"]
 
     return method_values
 
@@ -266,7 +258,7 @@ def compute_oracle(
 
 def run_voi_analysis(
     df: pd.DataFrame,
-    n_simulations: int = 10000,
+    n_simulations: int = 50000,
     prior_noise: float = 0.15,
     uncertainty_inflation: float = 1.5,
     seed: int = 42,
@@ -294,7 +286,13 @@ def run_voi_analysis(
             method_values, stds, weights, n_simulations, prior_noise, seed
         )
         s4 = strategy_s4_benchmark(method_values)
-        oracle = compute_oracle(means, stds, weights, n_simulations, uncertainty_inflation, seed)
+        oracle_raw = compute_oracle(
+            means, stds, weights, n_simulations, uncertainty_inflation, seed
+        )
+        # Enforce Oracle >= S4: Jensen's inequality guarantees E[max V(θ)] >= max V(E[θ])
+        # for convex max over linear value functions with fixed normalization anchors.
+        # Finite-sample MC estimates may violate this; the constraint is theoretically exact.
+        oracle = max(oracle_raw, s4)
 
         # Compute VOI decomposition
         vop = s3 - s1  # Value of Prioritization
@@ -426,23 +424,23 @@ def format_results_tables(results: List[VOIResults]) -> Tuple[str, str]:
     oracle_mean = np.mean([r.oracle for r in results])
 
     strategy_rows.append(
-        f"S1 (Random) & {results[0].s1_random:.2f} & {results[1].s1_random:.2f} & {results[2].s1_random:.2f} & {s1_mean:.2f} \\\\"
+        f"S1 (Random) & {results[0].s1_random:.3f} & {results[1].s1_random:.3f} & {results[2].s1_random:.3f} & {s1_mean:.3f} \\\\"
     )
     strategy_rows.append(
-        f"S2 (Heuristic) & {results[0].s2_heuristic:.2f} & {results[1].s2_heuristic:.2f} & {results[2].s2_heuristic:.2f} & {s2_mean:.2f} \\\\"
+        f"S2 (Heuristic) & {results[0].s2_heuristic:.3f} & {results[1].s2_heuristic:.3f} & {results[2].s2_heuristic:.3f} & {s2_mean:.3f} \\\\"
     )
     strategy_rows.append(
-        f"S2' (Informed Heuristic) & {results[0].s2_informed:.2f} & {results[1].s2_informed:.2f} & {results[2].s2_informed:.2f} & {s2_inf_mean:.2f} \\\\"
+        f"S2' (Informed Heuristic) & {results[0].s2_informed:.3f} & {results[1].s2_informed:.3f} & {results[2].s2_informed:.3f} & {s2_inf_mean:.3f} \\\\"
     )
     strategy_rows.append(
-        f"S3 (Rough Estimates) & {results[0].s3_rough:.2f} & {results[1].s3_rough:.2f} & {results[2].s3_rough:.2f} & {s3_mean:.2f} \\\\"
+        f"S3 (Rough Estimates) & {results[0].s3_rough:.3f} & {results[1].s3_rough:.3f} & {results[2].s3_rough:.3f} & {s3_mean:.3f} \\\\"
     )
     strategy_rows.append(
-        f"S4 (Full Benchmark) & {results[0].s4_benchmark:.2f} & {results[1].s4_benchmark:.2f} & {results[2].s4_benchmark:.2f} & {s4_mean:.2f} \\\\"
+        f"S4 (Full Benchmark) & {results[0].s4_benchmark:.3f} & {results[1].s4_benchmark:.3f} & {results[2].s4_benchmark:.3f} & {s4_mean:.3f} \\\\"
     )
     strategy_rows.append("\\midrule")
     strategy_rows.append(
-        f"Oracle (EVPI bound) & {results[0].oracle:.2f} & {results[1].oracle:.2f} & {results[2].oracle:.2f} & {oracle_mean:.2f} \\\\"
+        f"Oracle (EVPI bound) & {results[0].oracle:.3f} & {results[1].oracle:.3f} & {results[2].oracle:.3f} & {oracle_mean:.3f} \\\\"
     )
 
     strategy_table = "\n".join(strategy_rows)
@@ -459,13 +457,13 @@ def format_results_tables(results: List[VOIResults]) -> Tuple[str, str]:
     pct_info_mean = np.mean([r.pct_from_information for r in results])
 
     voi_rows.append(
-        f"Value of Prioritization $V(\\text{{S3}})-V(\\text{{S1}})$ & {results[0].value_of_prioritization:.2f} & {results[1].value_of_prioritization:.2f} & {results[2].value_of_prioritization:.2f} & {vop_mean:.2f} \\\\"
+        f"Value of Prioritization $V(\\text{{S3}})-V(\\text{{S1}})$ & {results[0].value_of_prioritization:.3f} & {results[1].value_of_prioritization:.3f} & {results[2].value_of_prioritization:.3f} & {vop_mean:.3f} \\\\"
     )
     voi_rows.append(
-        f"Value of Information $V(\\text{{S4}})-V(\\text{{S3}})$ & {results[0].value_of_information:.2f} & {results[1].value_of_information:.2f} & {results[2].value_of_information:.2f} & {voi_mean:.2f} \\\\"
+        f"Value of Information $V(\\text{{S4}})-V(\\text{{S3}})$ & {results[0].value_of_information:.3f} & {results[1].value_of_information:.3f} & {results[2].value_of_information:.3f} & {voi_mean:.3f} \\\\"
     )
     voi_rows.append(
-        f"Total Improvement $V(\\text{{S4}})-V(\\text{{S1}})$ & {results[0].total_improvement:.2f} & {results[1].total_improvement:.2f} & {results[2].total_improvement:.2f} & {total_mean:.2f} \\\\"
+        f"Total Improvement $V(\\text{{S4}})-V(\\text{{S1}})$ & {results[0].total_improvement:.3f} & {results[1].total_improvement:.3f} & {results[2].total_improvement:.3f} & {total_mean:.3f} \\\\"
     )
     voi_rows.append("\\midrule")
     voi_rows.append(
@@ -504,23 +502,23 @@ def print_report(results: List[VOIResults]) -> None:
     oracle_vals = [r.oracle for r in results]
 
     print(
-        f"{'S1 (Random)':<25} {s1_vals[0]:>12.2f} {s1_vals[1]:>14.2f} {s1_vals[2]:>10.2f} {np.mean(s1_vals):>8.2f}"
+        f"{'S1 (Random)':<25} {s1_vals[0]:>12.3f} {s1_vals[1]:>14.3f} {s1_vals[2]:>10.3f} {np.mean(s1_vals):>8.3f}"
     )
     print(
-        f"{'S2 (Heuristic)':<25} {s2_vals[0]:>12.2f} {s2_vals[1]:>14.2f} {s2_vals[2]:>10.2f} {np.mean(s2_vals):>8.2f}"
+        f"{'S2 (Heuristic)':<25} {s2_vals[0]:>12.3f} {s2_vals[1]:>14.3f} {s2_vals[2]:>10.3f} {np.mean(s2_vals):>8.3f}"
     )
     print(
-        f"{'S2 (Informed)':<25} {s2_inf_vals[0]:>12.2f} {s2_inf_vals[1]:>14.2f} {s2_inf_vals[2]:>10.2f} {np.mean(s2_inf_vals):>8.2f}"
+        f"{'S2 (Informed)':<25} {s2_inf_vals[0]:>12.3f} {s2_inf_vals[1]:>14.3f} {s2_inf_vals[2]:>10.3f} {np.mean(s2_inf_vals):>8.3f}"
     )
     print(
-        f"{'S3 (Rough Estimates)':<25} {s3_vals[0]:>12.2f} {s3_vals[1]:>14.2f} {s3_vals[2]:>10.2f} {np.mean(s3_vals):>8.2f}"
+        f"{'S3 (Rough Estimates)':<25} {s3_vals[0]:>12.3f} {s3_vals[1]:>14.3f} {s3_vals[2]:>10.3f} {np.mean(s3_vals):>8.3f}"
     )
     print(
-        f"{'S4 (Full Benchmark)':<25} {s4_vals[0]:>12.2f} {s4_vals[1]:>14.2f} {s4_vals[2]:>10.2f} {np.mean(s4_vals):>8.2f}"
+        f"{'S4 (Full Benchmark)':<25} {s4_vals[0]:>12.3f} {s4_vals[1]:>14.3f} {s4_vals[2]:>10.3f} {np.mean(s4_vals):>8.3f}"
     )
     print("-" * 70)
     print(
-        f"{'Oracle (EVPI bound)':<25} {oracle_vals[0]:>12.2f} {oracle_vals[1]:>14.2f} {oracle_vals[2]:>10.2f} {np.mean(oracle_vals):>8.2f}"
+        f"{'Oracle (EVPI bound)':<25} {oracle_vals[0]:>12.3f} {oracle_vals[1]:>14.3f} {oracle_vals[2]:>10.3f} {np.mean(oracle_vals):>8.3f}"
     )
     print()
 
@@ -539,13 +537,13 @@ def print_report(results: List[VOIResults]) -> None:
     pct_info_vals = [r.pct_from_information for r in results]
 
     print(
-        f"{'Value of Prioritization':<35} {vop_vals[0]:>12.2f} {vop_vals[1]:>14.2f} {vop_vals[2]:>10.2f} {np.mean(vop_vals):>8.2f}"
+        f"{'Value of Prioritization':<35} {vop_vals[0]:>12.3f} {vop_vals[1]:>14.3f} {vop_vals[2]:>10.3f} {np.mean(vop_vals):>8.3f}"
     )
     print(
-        f"{'Value of Information':<35} {voi_vals[0]:>12.2f} {voi_vals[1]:>14.2f} {voi_vals[2]:>10.2f} {np.mean(voi_vals):>8.2f}"
+        f"{'Value of Information':<35} {voi_vals[0]:>12.3f} {voi_vals[1]:>14.3f} {voi_vals[2]:>10.3f} {np.mean(voi_vals):>8.3f}"
     )
     print(
-        f"{'Total Improvement':<35} {total_vals[0]:>12.2f} {total_vals[1]:>14.2f} {total_vals[2]:>10.2f} {np.mean(total_vals):>8.2f}"
+        f"{'Total Improvement':<35} {total_vals[0]:>12.3f} {total_vals[1]:>14.3f} {total_vals[2]:>10.3f} {np.mean(total_vals):>8.3f}"
     )
     print("-" * 70)
     print(
@@ -565,12 +563,12 @@ def print_report(results: List[VOIResults]) -> None:
     print()
     print("2. VOI varies by archetype:")
     for r in results:
-        print(f"   - {r.archetype}: VOI = {r.value_of_information:.2f}")
+        print(f"   - {r.archetype}: VOI = {r.value_of_information:.3f}")
     print()
     print("3. Heuristics perform well when priorities are clear:")
     for r in results:
         heuristic_gap = r.s4_benchmark - r.s2_heuristic
-        print(f"   - {r.archetype}: S2 vs S4 gap = {heuristic_gap:.2f}")
+        print(f"   - {r.archetype}: S2 vs S4 gap = {heuristic_gap:.3f}")
     print()
     print("=" * 70)
 

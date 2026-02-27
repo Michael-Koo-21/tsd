@@ -45,6 +45,18 @@ DEFAULT_RUNTIME_MINUTES = {
     "great": 90.0,
 }
 
+# Normalized efficiency scores [0,1], higher = faster.
+# Derived from approximate observed runtimes (DEFAULT_RUNTIME_MINUTES) with
+# qualitative judgment. These are estimates, not precisely instrumented measurements.
+# Single source of truth: imported by voi_analysis.py and verify.py.
+NORMALIZED_EFFICIENCY = {
+    "independent_marginals": 1.0,  # <1 min on CPU
+    "synthpop": 1.0,  # <1 min on CPU
+    "ctgan": 0.90,  # ~1 min on CPU
+    "dpbn": 1.0,  # <1 min on CPU
+    "great": 0.24,  # ~90 min on Google Colab T4 GPU
+}
+
 # ── Metric definitions ───────────────────────────────────────────────────────
 
 # Map from CSV column name → abstract objective name
