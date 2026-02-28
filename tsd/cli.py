@@ -37,6 +37,15 @@ def cmd_run(args):
     )
 
 
+def _parse_value_refs(raw):
+    """Parse --value-refs argument: JSON string or 'auto'."""
+    if raw is None:
+        return None
+    if raw == "auto":
+        return "auto"
+    return json.loads(raw)
+
+
 def cmd_analyze(args):
     """Run MADA analysis and generate figures."""
     from tsd.analysis.figures import regenerate_paper_figures
@@ -48,7 +57,8 @@ def cmd_analyze(args):
         print(f"Error: results file not found: {results_path}", file=sys.stderr)
         sys.exit(1)
 
-    regenerate_paper_figures(results_path, output_dir)
+    value_refs = _parse_value_refs(args.value_refs)
+    regenerate_paper_figures(results_path, output_dir, value_refs=value_refs)
 
 
 def cmd_recommend(args):
@@ -130,6 +140,13 @@ def main():
         "--output-dir",
         type=str,
         default="results/experiments/figures",
+    )
+    p_analyze.add_argument(
+        "--value-refs",
+        type=str,
+        default=None,
+        help="Value function reference points: 'auto' to derive from data, "
+        'or JSON e.g. \'{"fidelity": {"x_worst": 0.9}}\'',
     )
     p_analyze.set_defaults(func=cmd_analyze)
 

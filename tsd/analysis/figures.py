@@ -13,52 +13,51 @@ import pandas as pd
 from tsd.constants import ARCHETYPES, COLORS, DEFAULT_RUNTIME_MINUTES, METHOD_LABELS
 
 
-def v_fidelity(x):
-    """Lower AUC = better. AUC=0.5 is ideal, x_worst = Ind. Marginals AUC"""
-    x_worst = 0.880
-    v = (x_worst - x) / (x_worst - 0.50)
+def v_fidelity(x, x_worst=0.880, x_best=0.50):
+    """Lower AUC = better. Defaults from ACS PUMS paper."""
+    v = (x_worst - x) / (x_worst - x_best)
     return max(0, min(1, v))
 
 
-def v_privacy(x):
-    """Higher DCR = better privacy"""
-    x_worst = 0.007  # Synthpop (worst)
-    x_best = 0.140  # Ind. Marginals (best)
+def v_privacy(x, x_worst=0.007, x_best=0.140):
+    """Higher DCR = better privacy. Defaults from ACS PUMS paper."""
     v = (x - x_worst) / (x_best - x_worst)
     return max(0, min(1, v))
 
 
-def v_utility(x):
-    """Higher TSTR = better. 1.0 is ideal, x_worst = Ind. Marginals"""
-    x_worst = 0.037
-    v = (x - x_worst) / (1.0 - x_worst)
+def v_utility(x, x_worst=0.037, x_best=1.0):
+    """Higher TSTR = better. Defaults from ACS PUMS paper."""
+    v = (x - x_worst) / (x_best - x_worst)
     return max(0, min(1, v))
 
 
-def v_fairness(x):
-    """Lower gap = better. x_worst = Ind. Marginals gap"""
-    x_worst = 0.080
-    v = (x_worst - x) / x_worst
+def v_fairness(x, x_worst=0.080, x_best=0.0):
+    """Lower gap = better. Defaults from ACS PUMS paper."""
+    v = (x_worst - x) / (x_worst - x_best)
     return max(0, min(1, v))
 
 
-def v_efficiency(x):
-    """Logarithmic. x_best ~ 0.5 min, ceiling at 480 min"""
-    x_best = 0.5
+def v_efficiency(x, x_best=0.5, x_ceiling=480):
+    """Logarithmic. Defaults from ACS PUMS paper."""
     if x <= x_best:
         return 1.0
-    v = 1 - np.log(x / x_best) / np.log(480 / x_best)
+    v = 1 - np.log(x / x_best) / np.log(x_ceiling / x_best)
     return max(0, min(1, v))
 
 
-def load_and_compute_values(filepath, normalization="reference"):
+def load_and_compute_values(filepath, normalization="reference", value_refs=None):
     """Load results and compute value scores.
 
     Args:
         filepath: Path to all_results.csv
         normalization: "reference" for reference-anchored value functions
-            (used in decision-focused analysis), or "minmax" for pure
-            min-max normalization (used in VOI analysis and Table 5).
+            (used in decision-focused analysis), "minmax" for pure
+            min-max normalization (used in VOI analysis and Table 5),
+            or "auto" for reference-anchored with data-derived reference points.
+        value_refs: Optional dict of reference points for value functions,
+            e.g. {"fidelity": {"x_worst": 0.9}, "privacy": {"x_best": 0.2}}.
+            Only used with "reference" normalization. Unspecified refs use
+            paper defaults.
     """
     df = pd.read_csv(filepath)
 
@@ -74,18 +73,44 @@ def load_and_compute_values(filepath, normalization="reference"):
     if normalization == "minmax":
         return _compute_minmax_values(summary)
 
+    if normalization == "auto":
+        value_refs = _derive_value_refs(summary)
+
+    refs = value_refs or {}
     value_scores = {}
     for method in summary.index:
         efficiency = DEFAULT_RUNTIME_MINUTES.get(method, 1.0)
         value_scores[method] = {
-            "fidelity": v_fidelity(summary.loc[method, "fidelity_auc"]),
-            "privacy": v_privacy(summary.loc[method, "privacy_dcr"]),
-            "utility": v_utility(summary.loc[method, "utility_tstr"]),
-            "fairness": v_fairness(summary.loc[method, "fairness_gap"]),
-            "efficiency": v_efficiency(efficiency),
+            "fidelity": v_fidelity(summary.loc[method, "fidelity_auc"], **refs.get("fidelity", {})),
+            "privacy": v_privacy(summary.loc[method, "privacy_dcr"], **refs.get("privacy", {})),
+            "utility": v_utility(summary.loc[method, "utility_tstr"], **refs.get("utility", {})),
+            "fairness": v_fairness(summary.loc[method, "fairness_gap"], **refs.get("fairness", {})),
+            "efficiency": v_efficiency(efficiency, **refs.get("efficiency", {})),
         }
 
     return value_scores
+
+
+def _derive_value_refs(summary):
+    """Derive value function reference points from actual data ranges."""
+    return {
+        "fidelity": {
+            "x_worst": summary["fidelity_auc"].max(),
+            "x_best": 0.50,
+        },
+        "privacy": {
+            "x_worst": summary["privacy_dcr"].min(),
+            "x_best": summary["privacy_dcr"].max(),
+        },
+        "utility": {
+            "x_worst": summary["utility_tstr"].min(),
+            "x_best": 1.0,
+        },
+        "fairness": {
+            "x_worst": summary["fairness_gap"].max(),
+            "x_best": 0.0,
+        },
+    }
 
 
 # Direction: True = higher is better, False = lower is better
@@ -212,9 +237,7 @@ def generate_pareto_frontier(df, output_dir):
         priv = summary.loc[method, "privacy_dcr"]
         fid = 1 - summary.loc[method, "fidelity_auc"]
 
-        ax.scatter(
-            priv, fid, s=200, c=COLORS[method], edgecolors="black", linewidth=1.5, zorder=3
-        )
+        ax.scatter(priv, fid, s=200, c=COLORS[method], edgecolors="black", linewidth=1.5, zorder=3)
 
         offset = (10, 10) if method != "independent" else (10, -15)
         ax.annotate(
@@ -403,19 +426,19 @@ def generate_tornado_sensitivity(value_scores, output_dir, baseline_weights=None
                 else:
                     weights[o] = remaining / len(other_objs)
             # Compute best method value at this weight
-            method_vals = {
-                m: calculate_weighted_score(value_scores, m, weights) for m in methods
-            }
+            method_vals = {m: calculate_weighted_score(value_scores, m, weights) for m in methods}
             values_at[w] = max(method_vals.values())
 
         lo_val = values_at[weight_lo]
         hi_val = values_at[weight_hi]
-        results.append({
-            "objective": obj,
-            "lo": min(lo_val, hi_val),
-            "hi": max(lo_val, hi_val),
-            "range": abs(hi_val - lo_val),
-        })
+        results.append(
+            {
+                "objective": obj,
+                "lo": min(lo_val, hi_val),
+                "hi": max(lo_val, hi_val),
+                "range": abs(hi_val - lo_val),
+            }
+        )
 
     # Sort by range (widest at top)
     results.sort(key=lambda r: r["range"])
@@ -425,9 +448,7 @@ def generate_tornado_sensitivity(value_scores, output_dir, baseline_weights=None
 
     y_positions = range(len(results))
     # Compute baseline value for the center line
-    baseline_val = max(
-        calculate_weighted_score(value_scores, m, baseline_weights) for m in methods
-    )
+    baseline_val = max(calculate_weighted_score(value_scores, m, baseline_weights) for m in methods)
 
     obj_labels = {
         "fidelity": "Fidelity",
@@ -457,8 +478,11 @@ def generate_tornado_sensitivity(value_scores, output_dir, baseline_weights=None
         )
         # Annotate range
         ax.text(
-            r["hi"] + 0.005, i, f"\u0394={r['range']:.3f}",
-            va="center", fontsize=9,
+            r["hi"] + 0.005,
+            i,
+            f"\u0394={r['range']:.3f}",
+            va="center",
+            fontsize=9,
         )
 
     ax.set_yticks(list(y_positions))
@@ -485,21 +509,31 @@ def generate_tornado_sensitivity(value_scores, output_dir, baseline_weights=None
     return fig_path
 
 
-def regenerate_paper_figures(results_path: str | Path, output_dir: str | Path):
+def regenerate_paper_figures(results_path: str | Path, output_dir: str | Path, value_refs=None):
     """
     Regenerate all paper figures.
 
     Args:
         results_path: Path to all_results.csv
         output_dir: Directory to write figure PNGs
+        value_refs: Optional value function reference points. Pass "auto" to
+            derive from data, a dict to override specific refs, or None for
+            paper defaults. Only affects reference-anchored normalization.
     """
     results_path = Path(results_path)
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
     df = pd.read_csv(results_path)
+    normalization = "auto" if value_refs == "auto" else "minmax"
+    norm_kwargs = {}
+    if isinstance(value_refs, dict):
+        normalization = "reference"
+        norm_kwargs["value_refs"] = value_refs
     # Profile comparison uses min-max normalization to match paper Table 5
-    value_scores_minmax = load_and_compute_values(results_path, normalization="minmax")
+    value_scores_minmax = load_and_compute_values(
+        results_path, normalization=normalization, **norm_kwargs
+    )
 
     generate_mada_profile_comparison(value_scores_minmax, output_dir)
     generate_tornado_sensitivity(value_scores_minmax, output_dir)
