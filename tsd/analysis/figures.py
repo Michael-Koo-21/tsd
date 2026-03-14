@@ -170,31 +170,36 @@ def generate_mada_profile_comparison(value_scores, output_dir):
 
     methods = list(value_scores.keys())
 
+    # Use a fixed method order across all panels (sorted by first archetype's score)
+    first_arch = list(ARCHETYPES.values())[0]
+    first_scores = [(m, calculate_weighted_score(value_scores, m, first_arch["weights"])) for m in methods]
+    first_scores.sort(key=lambda x: x[1], reverse=True)
+    fixed_order = [s[0] for s in first_scores]
+
     for idx, (_arch_id, arch) in enumerate(ARCHETYPES.items()):
         ax = axes[idx]
         weights = arch["weights"]
 
-        scores = [(m, calculate_weighted_score(value_scores, m, weights)) for m in methods]
-        scores.sort(key=lambda x: x[1], reverse=True)
+        score_map = {m: calculate_weighted_score(value_scores, m, weights) for m in methods}
+        scores_vals = [score_map[m] for m in fixed_order]
 
-        methods_sorted = [s[0] for s in scores]
-        scores_vals = [s[1] for s in scores]
-
+        # Highlight top scorer for this archetype
+        best_method = max(score_map, key=score_map.get)
         colors = [
-            "gold" if i == 0 else "silver" if i == 1 else "peru" if i == 2 else "lightgray"
-            for i in range(len(methods_sorted))
+            "gold" if m == best_method else "lightgray"
+            for m in fixed_order
         ]
 
         bars = ax.barh(
-            range(len(methods_sorted)),
+            range(len(fixed_order)),
             scores_vals,
             color=colors,
             edgecolor="black",
             linewidth=0.5,
         )
 
-        ax.set_yticks(range(len(methods_sorted)))
-        ax.set_yticklabels([METHOD_LABELS.get(m, m) for m in methods_sorted], fontsize=9)
+        ax.set_yticks(range(len(fixed_order)))
+        ax.set_yticklabels([METHOD_LABELS.get(m, m) for m in fixed_order], fontsize=9)
         ax.set_xlabel("Weighted Score")
         ax.set_title(f"{arch['name']}\n{arch['description']}", fontsize=10, fontweight="bold")
         ax.set_xlim(0, 1)

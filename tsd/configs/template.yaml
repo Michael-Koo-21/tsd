@@ -1,0 +1,58 @@
+# TSD Dataset Configuration Template
+#
+# Copy this file and fill in your dataset's details.
+# Then run:  tsd run --config my_config.yaml
+#
+# For the full framework walkthrough, see the paper or README.
+
+# Display name for your dataset (used in output messages)
+name: "My Dataset"
+
+# Path to your CSV file (relative to where you run the command, or absolute)
+data_path: "data/raw/my_data.csv"
+
+# --- Target Variable ---
+# The binary (0/1) column used for utility and fairness evaluation.
+# This column must exist in your CSV, OR you can derive it using target_binarize.
+target_variable: "target"
+
+# Optional: create the target variable by thresholding a continuous column.
+# Uncomment and edit if your target isn't already binary in the CSV.
+# target_binarize:
+#   source_column: "income"   # continuous column to threshold
+#   threshold: 50000          # values > threshold become 1, else 0
+
+# --- Fairness ---
+# Column containing demographic/protected group labels (e.g., race, sex).
+# Used to compute the fairness gap across subgroups.
+subgroup_column: "group"
+
+# --- Column Types ---
+# List ALL columns you want included in synthetic data generation.
+# Columns not listed here are dropped before generation.
+categorical_columns:
+  - "sex"
+  - "group"
+  - "education"
+
+continuous_columns:
+  - "age"
+  - "income"
+
+# --- Optional Settings ---
+
+# Sampling weight column (set to null if your data is unweighted)
+weight_column: null
+
+# Fraction of data used for training (rest is held out for testing)
+train_fraction: 0.7
+
+# Max rows to sample from your CSV (null = use all rows)
+sample_size: null
+
+# Random seed for reproducibility
+random_state: 42
+
+# Preprocessing pipeline. Use null for generic CSV loading.
+# Only set to "acs_pums" if you're using the bundled ACS PUMS dataset.
+preprocessing: null

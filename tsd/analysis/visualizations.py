@@ -76,8 +76,8 @@ def bar_chart_comparison(df: pd.DataFrame, output_dir: Path) -> Path:
                 fontsize=8,
             )
 
-        # Highlight best
-        if metric == "fairness_gap":
+        # Highlight best (lower is better for fidelity AUC and fairness gap)
+        if metric in ("fidelity_auc", "fairness_gap"):
             best_idx = np.argmin(means)
         else:
             best_idx = np.argmax(means)

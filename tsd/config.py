@@ -40,6 +40,35 @@ class DatasetConfig:
         if not 0 < self.train_fraction < 1:
             raise ValueError(f"train_fraction must be in (0, 1), got {self.train_fraction}")
 
+    def validate_against_data(self, df) -> None:
+        """Check that configured columns exist in the DataFrame.
+
+        Call this after loading the CSV on the generic (non-ACS) path.
+        Raises ValueError with a helpful message listing available columns.
+        """
+        available = set(df.columns)
+
+        def _check(col_name: str, field: str):
+            if col_name not in available:
+                raise ValueError(
+                    f"Column '{col_name}' specified in {field} not found in CSV.\n"
+                    f"Available columns: {sorted(available)}"
+                )
+
+        _check(self.target_variable, "target_variable")
+        _check(self.subgroup_column, "subgroup_column")
+
+        for col in self.categorical_columns:
+            _check(col, "categorical_columns")
+        for col in self.continuous_columns:
+            _check(col, "continuous_columns")
+
+        if self.target_binarize:
+            _check(self.target_binarize["source_column"], "target_binarize.source_column")
+
+        if self.weight_column:
+            _check(self.weight_column, "weight_column")
+
 
 def load_config(path: str | Path) -> DatasetConfig:
     """Load a DatasetConfig from a YAML file."""

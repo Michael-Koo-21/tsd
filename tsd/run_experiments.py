@@ -163,36 +163,60 @@ def compute_all_measures(df_train, df_test, df_synth, config: DatasetConfig):
 
 def run_experiments(
     config: DatasetConfig,
-    n_samples: int,
     n_replicates: int,
     methods: list,
     skip_measures: bool = False,
+    output_dir: Path | None = None,
+    sample_size: int | None = None,
+    n_synthetic: int | None = None,
 ):
-    """Run experiments for specified methods and replicates."""
+    """Run experiments for specified methods and replicates.
+
+    Args:
+        config: Dataset configuration.
+        n_replicates: Number of replicate runs per method.
+        methods: List of method names to run.
+        skip_measures: If True, generate synthetic data but skip evaluation.
+        output_dir: Directory for results (default: results/experiments).
+        sample_size: Max rows to sample from real data (overrides config.sample_size).
+        n_synthetic: Number of synthetic rows to generate (default: match training set).
+    """
+
+    if sample_size is not None:
+        config.sample_size = sample_size
 
     print("=" * 70)
     print("SYNTHETIC DATA GENERATION EXPERIMENTS")
     print("=" * 70)
     print(f"Dataset: {config.name}")
-    print(f"N samples: {n_samples:,}")
+    if config.sample_size:
+        print(f"Sample size: {config.sample_size:,}")
     print(f"N replicates: {n_replicates}")
     print(f"Methods: {', '.join(methods)}")
     print(f"Random seeds: {RANDOM_SEEDS[:n_replicates]}")
     print("=" * 70)
 
+    # Resolve output directories
+    results_dir = output_dir if output_dir is not None else RESULTS_DIR
+    synthetic_dir = results_dir / "synthetic_data"
+    measures_dir = results_dir / "measures"
+
     # Create directories
-    SYNTHETIC_DIR.mkdir(parents=True, exist_ok=True)
-    MEASURES_DIR.mkdir(parents=True, exist_ok=True)
+    synthetic_dir.mkdir(parents=True, exist_ok=True)
+    measures_dir.mkdir(parents=True, exist_ok=True)
 
     # Load checkpoint
-    checkpoint_file = RESULTS_DIR / "checkpoint.json"
+    checkpoint_file = results_dir / "checkpoint.json"
     checkpoint = load_checkpoint(checkpoint_file)
 
     # Load data
     print("\nLoading data...")
-    config.sample_size = n_samples
     df_train, df_test = load_and_preprocess(config)
+    # Resolve synthetic data size
+    n_synth = n_synthetic if n_synthetic is not None else len(df_train)
+
     print(f"Train: {len(df_train):,}, Test: {len(df_test):,}")
+    print(f"Synthetic rows per replicate: {n_synth:,}")
 
     generators = _build_generators(config)
 
@@ -225,7 +249,7 @@ def run_experiments(
             print(f"\n[{current_run}/{total_runs}] {run_id} (seed={seed})")
 
             # Generate synthetic data
-            synth_file = SYNTHETIC_DIR / f"{run_id}.csv"
+            synth_file = synthetic_dir / f"{run_id}.csv"
 
             if synth_file.exists():
                 print(f"  Loading existing synthetic data from {synth_file}")
@@ -234,7 +258,7 @@ def run_experiments(
                 print("  Generating synthetic data...")
                 start_time = time.time()
                 try:
-                    df_synth = generators[method](df_train, len(df_train), seed)
+                    df_synth = generators[method](df_train, n_synth, seed)
                     elapsed = time.time() - start_time
                     print(f"  Generated {len(df_synth):,} records in {elapsed:.1f}s")
 
@@ -258,7 +282,7 @@ def run_experiments(
                     "method": method,
                     "replicate": rep + 1,
                     "seed": seed,
-                    "n_samples": len(df_train),
+                    "n_samples": n_synth,
                     **measures,
                     "timestamp": datetime.now().isoformat(),
                 }
@@ -282,7 +306,7 @@ def run_experiments(
     # Save final results
     if all_results:
         results_df = pd.DataFrame(all_results)
-        results_file = RESULTS_DIR / "all_results.csv"
+        results_file = results_dir / "all_results.csv"
         results_df.to_csv(results_file, index=False)
         print(f"\n{'='*70}")
         print(f"Results saved to {results_file}")
@@ -307,7 +331,7 @@ def run_experiments(
         print(summary)
 
         # Save summary
-        summary_file = RESULTS_DIR / "summary.csv"
+        summary_file = results_dir / "summary.csv"
         summary.to_csv(summary_file)
         print(f"\nSummary saved to {summary_file}")
 

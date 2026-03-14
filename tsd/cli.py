@@ -22,18 +22,26 @@ def cmd_run(args):
     config_path = args.config if args.config else default_config_path()
     config = load_config(config_path)
 
+    output_dir = Path(args.output_dir) if args.output_dir else None
+    results_dir = output_dir if output_dir is not None else RESULTS_DIR
+
     if args.reset:
-        checkpoint_file = RESULTS_DIR / "checkpoint.json"
+        checkpoint_file = results_dir / "checkpoint.json"
         if checkpoint_file.exists():
             checkpoint_file.unlink()
             print("Checkpoint reset.")
 
+    # Resolve sample size: --sample-size takes priority, --n-samples is deprecated alias
+    sample_size = args.sample_size if args.sample_size is not None else args.n_samples
+
     run_experiments(
         config=config,
-        n_samples=args.n_samples,
+        sample_size=sample_size,
         n_replicates=args.n_replicates,
         methods=args.methods,
         skip_measures=args.skip_measures,
+        output_dir=output_dir,
+        n_synthetic=args.n_synthetic,
     )
 
 
@@ -118,7 +126,24 @@ def main():
     p_run.add_argument(
         "--config", type=str, default=None, help="Dataset config YAML (default: acs_pums)"
     )
-    p_run.add_argument("--n-samples", type=int, default=35000)
+    p_run.add_argument(
+        "--sample-size",
+        type=int,
+        default=None,
+        help="Max rows to sample from real data (default: use config value or all rows)",
+    )
+    p_run.add_argument(
+        "--n-samples",
+        type=int,
+        default=None,
+        help=argparse.SUPPRESS,  # deprecated alias for --sample-size
+    )
+    p_run.add_argument(
+        "--n-synthetic",
+        type=int,
+        default=None,
+        help="Number of synthetic rows to generate (default: match training set size)",
+    )
     p_run.add_argument("--n-replicates", type=int, default=5)
     p_run.add_argument(
         "--methods",
@@ -127,6 +152,12 @@ def main():
     )
     p_run.add_argument("--skip-measures", action="store_true")
     p_run.add_argument("--reset", action="store_true")
+    p_run.add_argument(
+        "--output-dir",
+        type=str,
+        default=None,
+        help="Directory for results (default: results/experiments)",
+    )
     p_run.set_defaults(func=cmd_run)
 
     # ── tsd analyze ───────────────────────────────────────────────────────

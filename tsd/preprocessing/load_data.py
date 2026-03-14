@@ -379,8 +379,9 @@ def load_and_preprocess(config: DatasetConfig) -> tuple[pd.DataFrame, pd.DataFra
             random_state=config.random_state,
         )
 
-    # Generic path: load CSV, sample, split
+    # Generic path: load CSV, validate, sample, split
     df = pd.read_csv(config.data_path)
+    config.validate_against_data(df)
     if config.sample_size and len(df) > config.sample_size:
         df = df.sample(n=config.sample_size, random_state=config.random_state)
     return train_test_split(df, train_size=config.train_fraction, random_state=config.random_state)

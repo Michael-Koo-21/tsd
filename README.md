@@ -100,6 +100,92 @@ print(recommendation)
 tsd verify --results results/experiments/all_results.csv
 ```
 
+## Use with Your Own Data
+
+The framework is designed for use on any tabular dataset with a binary classification task. Follow these steps to run the full pipeline on your own data.
+
+### 1. Create a Configuration File
+
+Copy the annotated template and edit it for your dataset:
+
+```bash
+cp tsd/configs/template.yaml my_dataset.yaml
+```
+
+The template documents every field. At minimum, specify:
+
+```yaml
+name: "My Dataset"
+data_path: "data/raw/my_data.csv"
+target_variable: "target"           # binary (0/1) classification column
+subgroup_column: "group"            # protected attribute for fairness
+categorical_columns: ["sex", "group", "education"]
+continuous_columns: ["age", "income"]
+preprocessing: null                 # use generic CSV loading
+```
+
+If your target variable is continuous, derive a binary column with `target_binarize`:
+
+```yaml
+target_binarize:
+  source_column: "income"
+  threshold: 50000
+```
+
+Column names are validated at runtime. If a name is misspelled or missing, the error message lists all available columns.
+
+### 2. Run Experiments
+
+Generate synthetic data and compute evaluation metrics:
+
+```bash
+tsd run --config my_dataset.yaml --output-dir results/my_dataset
+```
+
+Optional flags:
+
+| Flag | Purpose | Default |
+|------|---------|---------|
+| `--sample-size N` | Subsample N rows from your CSV | All rows |
+| `--n-synthetic N` | Number of synthetic rows to generate | Match training set |
+| `--n-replicates N` | Number of independent replicates | 5 |
+| `--methods m1 m2` | Subset of methods to run | All five |
+
+### 3. Analyze Results
+
+Run the MADA analysis and generate figures:
+
+```bash
+tsd analyze --results results/my_dataset/all_results.csv \
+            --output-dir results/my_dataset/figures \
+            --value-refs auto
+```
+
+The `--value-refs auto` flag derives value function reference points from your data's observed performance range, rather than using the ACS PUMS defaults from the paper.
+
+### 4. Get a Recommendation
+
+```bash
+tsd recommend --results results/my_dataset/all_results.csv --profile balanced
+```
+
+Available profiles: `privacy_first`, `utility_first`, `balanced`. For custom weights:
+
+```bash
+tsd recommend --results results/my_dataset/all_results.csv \
+  --weights '{"fidelity": 0.2, "privacy": 0.3, "utility": 0.3, "fairness": 0.1, "efficiency": 0.1}'
+```
+
+### 5. Verify and Interpret
+
+Check internal consistency of results:
+
+```bash
+tsd verify --results results/my_dataset/all_results.csv
+```
+
+Review the generated figures in `results/my_dataset/figures/` for tradeoff analysis, sensitivity plots, and stakeholder-specific recommendations.
+
 ## Methods Evaluated
 
 *Raw metric means across 5 replicates. Fidelity AUC: closer to 0.5 = better. Privacy DCR: higher = better. Utility TSTR: higher = better. Fairness Gap: lower = better.*
