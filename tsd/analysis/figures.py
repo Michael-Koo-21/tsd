@@ -172,7 +172,9 @@ def generate_mada_profile_comparison(value_scores, output_dir):
 
     # Use a fixed method order across all panels (sorted by first archetype's score)
     first_arch = list(ARCHETYPES.values())[0]
-    first_scores = [(m, calculate_weighted_score(value_scores, m, first_arch["weights"])) for m in methods]
+    first_scores = [
+        (m, calculate_weighted_score(value_scores, m, first_arch["weights"])) for m in methods
+    ]
     first_scores.sort(key=lambda x: x[1], reverse=True)
     fixed_order = [s[0] for s in first_scores]
 
@@ -185,10 +187,7 @@ def generate_mada_profile_comparison(value_scores, output_dir):
 
         # Highlight top scorer for this archetype
         best_method = max(score_map, key=score_map.get)
-        colors = [
-            "gold" if m == best_method else "lightgray"
-            for m in fixed_order
-        ]
+        colors = ["gold" if m == best_method else "lightgray" for m in fixed_order]
 
         bars = ax.barh(
             range(len(fixed_order)),

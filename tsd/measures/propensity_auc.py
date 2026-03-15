@@ -203,9 +203,7 @@ def propensity_auc_robustness(
             X_array,
         ),
         "lr": (
-            lambda: LogisticRegression(
-                max_iter=1000, random_state=random_state
-            ),
+            lambda: LogisticRegression(max_iter=1000, random_state=random_state),
             X_scaled,
         ),
         "mlp": (
